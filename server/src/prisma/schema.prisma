@@ -1,0 +1,14 @@
+// This is a placeholder Prisma schema.
+// Run `npx prisma init` to set up the datasource block,
+// then define models here when the data layer is implemented.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Models will be added in the next phase.
