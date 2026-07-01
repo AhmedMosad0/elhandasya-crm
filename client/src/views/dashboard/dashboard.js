@@ -5,7 +5,7 @@ export async function renderDashboard() {
   document.getElementById('sectionDashboard').innerHTML = '<div class="empty" style="padding:40px">Loading dashboard…</div>';
   try {
     const [orders, requests] = await Promise.all([api.getOrders(), api.getRequests()]);
-    const pending = requests.filter(r => r.status === 'pending').length;
+    const pending = requests.filter(r => r.status === 'pending' || r.status === 'pricing_submitted').length;
     const revenue = orders.reduce((a, o) => a + o.totalAmount, 0);
     const paid    = orders.reduce((a, o) => a + o.paidAmount,  0);
     const active  = orders.filter(o => o.status !== 'delivered').length;
@@ -31,13 +31,13 @@ export async function renderDashboard() {
         </tbody></table></div></div>
       <div class="card"><div class="ch"><h3>Pending Requests</h3><button class="btn btn-ghost btn-sm" onclick="navigate('requests')">View all</button></div>
         <div class="cb" style="padding-top:12px">
-          ${requests.filter(r => r.status === 'pending').length
-            ? requests.filter(r => r.status === 'pending').slice(0, 4).map(r => `
+          ${requests.filter(r => r.status === 'pending' || r.status === 'pricing_submitted').length
+            ? requests.filter(r => r.status === 'pending' || r.status === 'pricing_submitted').slice(0, 4).map(r => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-l)">
-            <div><div style="font-weight:700;font-size:13.5px">${r.clientName}</div>
+            <div><div style="font-weight:700;font-size:13.5px">${r.clientName}${r.status === 'pricing_submitted' ? ' <span style="font-size:10px;padding:2px 6px;border-radius:3px;background:#fdf3dc;color:#b45309;font-weight:600">Pricing Review</span>' : ''}</div>
               <div style="font-size:11.5px;color:var(--mute)">${r.ref} · ${fmtDate(r.createdAt)} · ${fmtCur(r.totalAmount)}</div></div>
             <div style="display:flex;gap:6px">
-              <button class="btn btn-green btn-xs" onclick="${r.source !== 'sales' ? 'promptApproveWithSales' : 'approveRequest'}('${r.id}')">✓</button>
+              <button class="btn btn-green btn-xs" onclick="${r.status === 'pricing_submitted' ? 'doFinalApprove' : r.source !== 'sales' ? 'promptApproveWithSales' : 'approveRequest'}('${r.id}')">✓</button>
               <button class="btn btn-danger btn-xs" onclick="promptReject('${r.id}')">✕</button></div>
           </div>`).join('')
             : '<div class="empty" style="padding:24px"><div>✅</div><p>All requests handled</p></div>'}
