@@ -152,6 +152,7 @@ export async function assignUser(oid, role, uid) {
   try {
     await api.assignOrder(oid, { role, userId: uid });
     showToast('Assignment saved', 'toast-gold');
+    await openOrderModal(oid);
   } catch (err) {
     showToast('Failed to assign: ' + err.message, 'toast-red');
   }
@@ -161,6 +162,7 @@ export async function updateOrderStatus(oid, val) {
   try {
     await api.updateOrderStatus(oid, { status: val });
     showToast('Status updated', 'toast-gold');
+    await openOrderModal(oid);
   } catch (err) {
     showToast('Failed: ' + err.message, 'toast-red');
   }
@@ -170,6 +172,7 @@ export async function updatePayStatus(oid, val) {
   try {
     await api.updateOrderStatus(oid, { paymentStatus: val });
     showToast('Payment status updated', 'toast-gold');
+    await openOrderModal(oid);
   } catch (err) {
     showToast('Failed: ' + err.message, 'toast-red');
   }
