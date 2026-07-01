@@ -21,6 +21,8 @@ model User {
   passwordHash   String
   avatarInitials String
   clientId       String?
+  phone          String?
+  status         String   @default("active")
   createdAt      DateTime @default(now())
 
   clientRecord Client?       @relation(fields: [clientId], references: [id])

@@ -27,28 +27,93 @@
       </div>
     </div>
     <div class="login-divider"></div>
-    <div class="login-h" id="loginPanelTitle">Welcome Back</div>
-    <div class="login-sub" id="loginPanelSub">Sign in to your workspace</div>
-    <div class="lf-group">
-      <label class="lf-label">Username</label>
-      <input class="lf-input" id="loginUser" type="text" placeholder="e.g. admin" onkeydown="if(event.key==='Enter')doLogin()">
+
+    <!-- ── LOGIN FORM ── -->
+    <div id="loginForm">
+      <div class="login-h" id="loginPanelTitle">Welcome Back</div>
+      <div class="login-sub" id="loginPanelSub">Sign in to your workspace</div>
+      <div class="lf-group">
+        <label class="lf-label">Username</label>
+        <input class="lf-input" id="loginUser" type="text" placeholder="e.g. admin" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">Password</label>
+        <input class="lf-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="lf-btn" id="loginBtn" onclick="doLogin()">Sign In →</button>
+      <div class="lf-err" id="loginErr"></div>
+      <div class="login-hints" id="loginHints">
+        <div class="login-hints-title">Staff Accounts</div>
+        <div class="hint-row">⬛ Admin <span>admin / admin123</span></div>
+        <div class="hint-row">🟤 Sales <span>sales1 / sales123</span></div>
+        <div class="hint-row">🟡 Mixer <span>mixer1 / mix123</span></div>
+        <div class="hint-row">🟢 Delivery <span>delivery1 / del123</span></div>
+      </div>
+      <div class="login-portal-toggle" id="portalToggle">
+        Client? <a onclick="togglePortal()">Access Client Portal →</a>
+      </div>
+      <div class="login-signup-links">
+        <div>New client? <a onclick="showSignup('client')">Create account →</a></div>
+        <div>Staff member? <a onclick="showSignup('sales')">Request access →</a></div>
+      </div>
     </div>
-    <div class="lf-group">
-      <label class="lf-label">Password</label>
-      <input class="lf-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+
+    <!-- ── SIGNUP FORM ── -->
+    <div id="signupForm" class="hidden">
+      <div class="login-h">Create Account</div>
+      <div class="login-sub">Join the El Handasya platform</div>
+      <div class="lf-group">
+        <label class="lf-label">Full Name</label>
+        <input class="lf-input" id="signupName" type="text" placeholder="e.g. Ahmed Mohamed">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">Username</label>
+        <input class="lf-input" id="signupUsername" type="text" placeholder="e.g. ahmed_m">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">Password</label>
+        <input class="lf-input" id="signupPassword" type="password" placeholder="••••••••">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">Phone</label>
+        <input class="lf-input" id="signupPhone" type="text" placeholder="e.g. 01012345678">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">I am a…</label>
+        <div class="signup-role-toggle">
+          <button id="signupRoleBtn_client"   class="role-btn active" onclick="selectSignupRole('client')">Client</button>
+          <button id="signupRoleBtn_sales"    class="role-btn"        onclick="selectSignupRole('sales')">Sales</button>
+          <button id="signupRoleBtn_mixer"    class="role-btn"        onclick="selectSignupRole('mixer')">Mixer</button>
+          <button id="signupRoleBtn_delivery" class="role-btn"        onclick="selectSignupRole('delivery')">Delivery</button>
+        </div>
+      </div>
+      <div id="signupClientFields">
+        <div class="lf-group">
+          <label class="lf-label">Email <span class="lf-opt">(optional)</span></label>
+          <input class="lf-input" id="signupEmail" type="email" placeholder="e.g. ahmed@gmail.com">
+        </div>
+        <div class="lf-group">
+          <label class="lf-label">Address <span class="lf-opt">(optional)</span></label>
+          <input class="lf-input" id="signupAddress" type="text" placeholder="e.g. Cairo, Maadi">
+        </div>
+        <div class="lf-group">
+          <label class="lf-label">Company <span class="lf-opt">(optional)</span></label>
+          <input class="lf-input" id="signupCompany" type="text" placeholder="e.g. Ahmed Construction">
+        </div>
+        <div class="lf-group">
+          <label class="lf-label">Link Existing Record <span class="lf-opt">(optional)</span></label>
+          <input class="lf-input" id="signupPhoneMatch" type="text" placeholder="Phone of your existing client record">
+          <div class="lf-hint">Enter your phone if you already have a client record with us</div>
+        </div>
+      </div>
+      <button class="lf-btn" onclick="doSignup()">Create Account →</button>
+      <div class="lf-err" id="signupErr"></div>
+      <div class="lf-success hidden" id="signupSuccess"></div>
+      <div class="login-portal-toggle" style="margin-top:14px">
+        Already have an account? <a onclick="showLogin()">Sign in →</a>
+      </div>
     </div>
-    <button class="lf-btn" id="loginBtn" onclick="doLogin()">Sign In →</button>
-    <div class="lf-err" id="loginErr"></div>
-    <div class="login-hints" id="loginHints">
-      <div class="login-hints-title">Staff Accounts</div>
-      <div class="hint-row">⬛ Admin <span>admin / admin123</span></div>
-      <div class="hint-row">🟤 Sales <span>sales1 / sales123</span></div>
-      <div class="hint-row">🟡 Mixer <span>mixer1 / mix123</span></div>
-      <div class="hint-row">🟢 Delivery <span>delivery1 / del123</span></div>
-    </div>
-    <div class="login-portal-toggle" id="portalToggle">
-      Client? <a onclick="togglePortal()">Access Client Portal →</a>
-    </div>
+
   </div>
 </div>
 
@@ -98,6 +163,7 @@
       <div class="section" id="sectionRequests"></div>
       <div class="section" id="sectionOrders"></div>
       <div class="section" id="sectionClients"></div>
+      <div class="section" id="sectionUsers"></div>
       <div class="section" id="sectionReports"></div>
       <div class="section" id="sectionMywork"></div>
       <div class="section" id="sectionClientportal"></div>

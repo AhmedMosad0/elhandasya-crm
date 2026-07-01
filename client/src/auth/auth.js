@@ -2,6 +2,7 @@ import { App } from '../state/store.js';
 import * as api from '../api/index.js';
 
 export let _portalMode = false;
+let _signupRole = 'client';
 
 export function roleLabel(r) {
   return { admin:'Administrator', sales:'Sales Representative', mixer:'Color Technician', delivery:'Delivery Agent', client:'Client Account' }[r] || r;
@@ -62,6 +63,85 @@ export function logout() {
   document.getElementById('loginScreen').classList.remove('hidden');
   ['loginUser', 'loginPass'].forEach(id => (document.getElementById(id).value = ''));
   document.getElementById('loginErr').textContent = '';
+  _resetToLogin();
+}
+
+export function showSignup(role) {
+  _signupRole = role || 'client';
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('signupForm').classList.remove('hidden');
+  document.getElementById('signupErr').textContent = '';
+  document.getElementById('signupSuccess').classList.add('hidden');
+  selectSignupRole(_signupRole);
+}
+
+export function showLogin() {
+  document.getElementById('signupForm').classList.add('hidden');
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('loginErr').textContent = '';
+}
+
+export function selectSignupRole(role) {
+  _signupRole = role;
+  ['client', 'sales', 'mixer', 'delivery'].forEach(r => {
+    const btn = document.getElementById('signupRoleBtn_' + r);
+    if (btn) btn.classList.toggle('active', r === role);
+  });
+  const clientFields = document.getElementById('signupClientFields');
+  if (clientFields) clientFields.classList.toggle('hidden', role !== 'client');
+}
+
+export async function doSignup() {
+  const name     = document.getElementById('signupName').value.trim();
+  const username = document.getElementById('signupUsername').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const phone    = document.getElementById('signupPhone').value.trim();
+  const role     = _signupRole;
+  const errEl    = document.getElementById('signupErr');
+  const successEl = document.getElementById('signupSuccess');
+  errEl.textContent = '';
+  successEl.classList.add('hidden');
+
+  if (!name || !username || !password || !phone) {
+    errEl.textContent = '❌ Please fill in all required fields.';
+    return;
+  }
+
+  const data = { name, username, password, phone, role };
+  if (role === 'client') {
+    const email      = document.getElementById('signupEmail').value.trim();
+    const address    = document.getElementById('signupAddress').value.trim();
+    const company    = document.getElementById('signupCompany').value.trim();
+    const phoneMatch = document.getElementById('signupPhoneMatch').value.trim();
+    if (email)      data.email      = email;
+    if (address)    data.address    = address;
+    if (company)    data.company    = company;
+    if (phoneMatch) data.phoneForMatch = phoneMatch;
+  }
+
+  try {
+    const result = await api.signup(data);
+    if (result.token) {
+      api.setToken(result.token);
+      App.user = { ...result.user, av: result.user.avatarInitials };
+      window._showApp();
+    } else {
+      successEl.textContent = '✓ ' + (result.message || 'Account created. Waiting for admin approval.');
+      successEl.classList.remove('hidden');
+      ['signupName', 'signupUsername', 'signupPassword', 'signupPhone',
+       'signupEmail', 'signupAddress', 'signupCompany', 'signupPhoneMatch']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    }
+  } catch (err) {
+    errEl.textContent = '❌ ' + (err.message || 'Signup failed.');
+  }
+}
+
+function _resetToLogin() {
+  const sf = document.getElementById('signupForm');
+  const lf = document.getElementById('loginForm');
+  if (sf) sf.classList.add('hidden');
+  if (lf) lf.classList.remove('hidden');
 }
 
 export async function showApp() {
@@ -98,4 +178,5 @@ window.addEventListener('session-expired', () => {
   if (app)   app.classList.add('hidden');
   if (login) login.classList.remove('hidden');
   if (err)   err.textContent = '❌ Session expired — please sign in again.';
+  _resetToLogin();
 });

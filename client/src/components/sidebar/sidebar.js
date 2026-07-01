@@ -2,7 +2,7 @@ import { App } from '../../state/store.js';
 import * as api from '../../api/index.js';
 
 const NAV = {
-  admin:    [{ icon:'◈', label:'Dashboard',      key:'dashboard' }, { icon:'◌', label:'Requests',       key:'requests', badge:true }, { icon:'▣', label:'Orders', key:'orders' }, { icon:'◉', label:'Clients', key:'clients' }, { icon:'▦', label:'Reports', key:'reports' }],
+  admin:    [{ icon:'◈', label:'Dashboard', key:'dashboard' }, { icon:'◌', label:'Requests', key:'requests', badge:true }, { icon:'▣', label:'Orders', key:'orders' }, { icon:'◉', label:'Clients', key:'clients' }, { icon:'◎', label:'Users', key:'users', usersBadge:true }, { icon:'▦', label:'Reports', key:'reports' }],
   sales:    [{ icon:'◌', label:'My Requests',    key:'requests' }, { icon:'◉', label:'Clients', key:'clients' }],
   mixer:    [{ icon:'●', label:'My Work Queue',  key:'mywork' }],
   delivery: [{ icon:'▷', label:'My Deliveries',  key:'mywork' }, { icon:'▣', label:'All Orders', key:'orders' }],
@@ -12,20 +12,26 @@ const NAV = {
 export async function renderNav() {
   const items = NAV[App.user.role] || [];
   let pending = 0;
+  let pendingUsers = 0;
   try {
     const reqs = await api.getRequests();
     pending = reqs.filter(r => r.status === 'pending').length;
-  } catch { /* non-fatal — badge just won't show */ }
+  } catch { /* non-fatal */ }
+  if (App.user.role === 'admin') {
+    try {
+      const users = await api.getUsers();
+      pendingUsers = users.filter(u => u.status === 'pending').length;
+    } catch { /* non-fatal */ }
+  }
   document.getElementById('sbNav').innerHTML = items.map(n => {
-    const badge = n.badge && pending > 0 ? `<span class="nav-badge">${pending}</span>` : '';
-    return `<div class="nav-item" id="nav-${n.key}" onclick="navigate('${n.key}')"><span class="nav-icon">${n.icon}</span>${n.label}${badge}</div>`;
+    const badge      = n.badge      && pending      > 0 ? `<span class="nav-badge">${pending}</span>`      : '';
+    const usersBadge = n.usersBadge && pendingUsers > 0 ? `<span class="nav-badge">${pendingUsers}</span>` : '';
+    return `<div class="nav-item" id="nav-${n.key}" onclick="navigate('${n.key}')"><span class="nav-icon">${n.icon}</span>${n.label}${badge}${usersBadge}</div>`;
   }).join('');
-  // Re-apply active state for the already-navigated section
   const current = document.getElementById('nav-' + App.section);
   if (current) current.classList.add('active');
-  // Update notif dot — we already have the count, avoid a second fetch
   const dot = document.getElementById('notifDot');
-  if (dot) dot.style.display = pending > 0 && App.user?.role === 'admin' ? '' : 'none';
+  if (dot) dot.style.display = (pending > 0 || pendingUsers > 0) && App.user?.role === 'admin' ? '' : 'none';
 }
 
 export function updateNotifDot() {

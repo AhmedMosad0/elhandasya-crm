@@ -19,4 +19,12 @@ export const usersController = {
       res.status(204).end();
     } catch (err) { next(err); }
   },
+
+  approve: async (req, res, next) => {
+    try { res.json(await usersService.approve(req.params.id)); } catch (err) { next(err); }
+  },
+
+  reject: async (req, res, next) => {
+    try { res.json(await usersService.reject(req.params.id)); } catch (err) { next(err); }
+  },
 };

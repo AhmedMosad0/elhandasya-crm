@@ -1,4 +1,4 @@
-import { doLogin, logout, togglePortal, showApp, checkSession } from './auth/auth.js';
+import { doLogin, logout, togglePortal, showApp, checkSession, doSignup, showSignup, showLogin, selectSignupRole } from './auth/auth.js';
 import { navigate } from './router.js';
 import { openModal, closeModal } from './components/modal/modal.js';
 import { showToast } from './components/toast/toast.js';
@@ -21,10 +21,13 @@ import { renderClientPortal } from './views/client-portal/client-portal.js';
 import { renderClientOrders, openClientOrderDetail } from './views/client-orders/client-orders.js';
 import { renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder } from './views/client-neworder/client-neworder.js';
 import { renderClientAccount } from './views/client-account/client-account.js';
+import { renderUsers, approveUserById, rejectUserById } from './views/users/users.js';
 
 // Wire functions referenced from inline onclick/oninput attributes onto window.
 Object.assign(window, {
   doLogin, logout, togglePortal, navigate, handleSearch,
+  doSignup, showSignup, showLogin, selectSignupRole,
+  renderUsers, approveUserById, rejectUserById,
   openModal, closeModal, showToast,
   renderDashboard,
   renderRequests, openNewRequestModal, approveRequest, promptReject, doReject,

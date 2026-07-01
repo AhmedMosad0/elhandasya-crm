@@ -43,9 +43,12 @@ export async function login(username, password) {
   return user; // { id, name, role, avatarInitials, clientId }
 }
 export async function getMe() { return _req('GET', '/auth/me'); }
+export async function signup(data) { return _req('POST', '/auth/signup', data); }
 
 // ── Users ──
 export async function getUsers() { return _req('GET', '/users'); }
+export async function approveUser(id) { return _req('PATCH', '/users/' + id + '/approve'); }
+export async function rejectUser(id)  { return _req('PATCH', '/users/' + id + '/reject'); }
 
 // ── Clients ──
 export async function getClients()       { return _req('GET',  '/clients'); }

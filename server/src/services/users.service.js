@@ -44,4 +44,18 @@ export const usersService = {
     await usersService.getById(id);
     return usersRepository.delete(id);
   },
+
+  async approve(id) {
+    await usersService.getById(id);
+    return usersRepository.update(id, { status: 'active' });
+  },
+
+  async reject(id) {
+    await usersService.getById(id);
+    return usersRepository.update(id, { status: 'rejected' });
+  },
+
+  async listPending() {
+    return usersRepository.findPending();
+  },
 };
