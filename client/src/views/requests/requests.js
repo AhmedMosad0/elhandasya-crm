@@ -227,6 +227,7 @@ export async function doApproveWithSales(reqId) {
     await window._renderNav();
     showToast('Request approved and assigned for pricing', 'toast-gold');
     if (App.section === 'requests') await renderRequests('all');
+    else if (App.section === 'dashboard') await window.renderDashboard();
   } catch (err) {
     showToast('Failed: ' + err.message, 'toast-red');
   }

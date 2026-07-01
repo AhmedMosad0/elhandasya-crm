@@ -36,7 +36,8 @@ export async function renderDashboard() {
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-l)">
             <div><div style="font-weight:700;font-size:13.5px">${r.clientName}</div>
               <div style="font-size:11.5px;color:var(--mute)">${r.ref} · ${fmtDate(r.createdAt)} · ${fmtCur(r.totalAmount)}</div></div>
-            <div style="display:flex;gap:6px"><button class="btn btn-green btn-xs" onclick="approveRequest('${r.id}')">✓</button>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-green btn-xs" onclick="${r.source === 'client' ? `promptApproveWithSales('${r.id}')` : `approveRequest('${r.id}')`}">✓</button>
               <button class="btn btn-danger btn-xs" onclick="promptReject('${r.id}')">✕</button></div>
           </div>`).join('')
             : '<div class="empty" style="padding:24px"><div>✅</div><p>All requests handled</p></div>'}
