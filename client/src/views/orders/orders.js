@@ -46,9 +46,12 @@ function _orderCard(o) {
 
 export async function openOrderModal(oid) {
   try {
-    const [o, users] = await Promise.all([api.getOrder(oid), api.getUsers()]);
-    if (!o) return;
     const isAdmin = App.user.role === 'admin';
+    const [o, users] = await Promise.all([
+      api.getOrder(oid),
+      isAdmin ? api.getUsers() : Promise.resolve([]),
+    ]);
+    if (!o) return;
     const canDel  = App.user.role === 'delivery' && o.deliveryId === App.user.id;
     const mixers  = users.filter(u => u.role === 'mixer');
     const delvrs  = users.filter(u => u.role === 'delivery');
