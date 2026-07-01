@@ -15,7 +15,7 @@ export async function renderNav() {
   let pendingUsers = 0;
   try {
     const reqs = await api.getRequests();
-    pending = reqs.filter(r => r.status === 'pending').length;
+    pending = reqs.filter(r => r.status === 'pending' || r.status === 'pricing_submitted').length;
   } catch { /* non-fatal */ }
   if (App.user.role === 'admin') {
     try {

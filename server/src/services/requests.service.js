@@ -1,5 +1,6 @@
 import { requestsRepository } from '../repositories/requests.repository.js';
 import { ordersRepository } from '../repositories/orders.repository.js';
+import { usersRepository } from '../repositories/users.repository.js';
 
 function now() { return new Date(); }
 function nowStr() { return now().toISOString().replace('T', ' ').substring(0, 16); }
@@ -9,11 +10,41 @@ function genRecipeNum(date, counter) {
   return `EH-${ds}-${String(counter).padStart(4, '0')}`;
 }
 
+async function _createOrderFromRequest(req, source) {
+  const orderCount = await ordersRepository.count();
+  const recipeNum = genRecipeNum(now(), orderCount + 1);
+  return ordersRepository.create({
+    recipeNum, requestId: req.id, source,
+    clientId: req.clientId, clientName: req.clientName,
+    clientPhone: req.phone, clientAddress: req.address,
+    totalAmount: req.totalAmount, paidAmount: 0,
+    paymentStatus: 'unpaid', status: 'pending',
+    salesId: req.assignedSalesId || req.createdBy || null,
+    salesName: req.assignedSalesName || req.salesName || null,
+    notes: req.notes || null,
+    products: {
+      create: req.products.map(p => ({
+        name: p.name, colorCode: p.colorCode, colorName: p.colorName,
+        qty: p.qty, unit: 'L', price: p.price, total: p.total, delivered: 0,
+      })),
+    },
+    activity: {
+      create: [{ text: `Order created from ${req.ref}`, time: nowStr(), userName: 'System' }],
+    },
+  });
+}
+
 export const requestsService = {
   list(user) {
-    const where = {};
-    if (user.role === 'sales') where.createdBy = user.id;
-    else if (user.role === 'client') where.clientId = user.clientId;
+    let where = {};
+    if (user.role === 'sales') {
+      where = { OR: [
+        { createdBy: user.id },
+        { assignedSalesId: user.id, status: 'approved' },
+      ]};
+    } else if (user.role === 'client') {
+      where = { clientId: user.clientId };
+    }
     return requestsRepository.findAll(where);
   },
 
@@ -23,7 +54,7 @@ export const requestsService = {
     return r;
   },
 
-  async create({ clientId, clientName, phone, email, address, products, notes, createdBy, salesName }) {
+  async create({ clientId, clientName, phone, email, address, products, notes, createdBy, salesName, source }) {
     if (!clientId || !products?.length) {
       throw Object.assign(new Error('clientId and at least one product are required'), { status: 400 });
     }
@@ -32,62 +63,84 @@ export const requestsService = {
     const totalAmount = products.reduce((a, p) => a + (p.total ?? p.qty * p.price), 0);
 
     return requestsRepository.create({
-      ref, clientId, clientName, phone, email: email || null, address,
+      ref, source: source || 'sales',
+      clientId, clientName, phone, email: email || null, address,
       totalAmount, notes: notes || null, salesName, createdBy,
       products: {
         create: products.map(p => ({
           name: p.name, colorCode: p.colorCode || '', colorName: p.colorName || '',
-          qty: p.qty, unit: p.unit || 'L', price: p.price,
-          total: p.total ?? p.qty * p.price,
+          qty: p.qty, unit: 'L', price: p.price ?? 0,
+          total: p.total ?? p.qty * (p.price ?? 0),
         })),
       },
     });
   },
 
-  async approve(id) {
+  async approve(id, { assignedSalesId } = {}) {
     const req = await requestsRepository.findById(id);
     if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
     if (req.status !== 'pending') {
       throw Object.assign(new Error('Only pending requests can be approved'), { status: 400 });
     }
-    if (req.order) {
-      throw Object.assign(new Error('An order already exists for this request'), { status: 409 });
+
+    if (req.source === 'sales') {
+      // Sales flow: approve immediately and create order
+      if (req.order) throw Object.assign(new Error('An order already exists for this request'), { status: 409 });
+      await requestsRepository.update(id, { status: 'final_approved' });
+      return _createOrderFromRequest(req, 'sales');
     }
 
-    await requestsRepository.update(id, { status: 'approved' });
+    // Client flow: assign a salesperson, hold for pricing
+    if (!assignedSalesId) {
+      throw Object.assign(new Error('assignedSalesId is required for client requests'), { status: 400 });
+    }
+    const salesUser = await usersRepository.findById(assignedSalesId);
+    if (!salesUser) throw Object.assign(new Error('Assigned sales user not found'), { status: 404 });
 
-    const orderCount = await ordersRepository.count();
-    const recipeNum = genRecipeNum(now(), orderCount + 1);
-
-    return ordersRepository.create({
-      recipeNum, requestId: id, source: 'sales',
-      clientId: req.clientId, clientName: req.clientName,
-      clientPhone: req.phone, clientAddress: req.address,
-      totalAmount: req.totalAmount, paidAmount: 0,
-      paymentStatus: 'unpaid', status: 'pending',
-      salesId: req.createdBy, salesName: req.salesName,
-      notes: req.notes || null,
-      products: {
-        create: req.products.map(p => ({
-          name: p.name, colorCode: p.colorCode, colorName: p.colorName,
-          qty: p.qty, unit: p.unit, price: p.price, total: p.total, delivered: 0,
-        })),
-      },
-      activity: {
-        create: [{
-          text: `Order created from ${req.ref}`,
-          time: nowStr(),
-          userName: 'System',
-        }],
-      },
+    return requestsRepository.update(id, {
+      status: 'approved',
+      assignedSalesId,
+      assignedSalesName: salesUser.name,
     });
+  },
+
+  async assignPricing(id, products, actorId) {
+    const req = await requestsRepository.findById(id);
+    if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
+    if (req.status !== 'approved') {
+      throw Object.assign(new Error('Request must be approved before pricing can be added'), { status: 400 });
+    }
+    if (req.assignedSalesId !== actorId) {
+      throw Object.assign(new Error('You are not assigned to price this request'), { status: 403 });
+    }
+
+    for (const { id: prodId, price, qty } of products) {
+      await requestsRepository.updateProduct(prodId, { price: price ?? 0, total: (qty ?? 0) * (price ?? 0) });
+    }
+
+    const updated = await requestsRepository.findById(id);
+    const newTotal = updated.products.reduce((a, p) => a + p.total, 0);
+    return requestsRepository.update(id, { status: 'pricing_submitted', totalAmount: newTotal });
+  },
+
+  async finalApprove(id) {
+    const req = await requestsRepository.findById(id);
+    if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
+    if (req.status !== 'pricing_submitted') {
+      throw Object.assign(new Error('Request must have pricing submitted before final approval'), { status: 400 });
+    }
+    if (req.order) throw Object.assign(new Error('An order already exists for this request'), { status: 409 });
+
+    await requestsRepository.update(id, { status: 'final_approved' });
+    return _createOrderFromRequest(req, 'client');
   },
 
   async reject(id, rejectionReason) {
     const req = await requestsRepository.findById(id);
     if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
-    if (req.status !== 'pending') {
-      throw Object.assign(new Error('Only pending requests can be rejected'), { status: 400 });
+    const rejectableStatuses = ['pending', 'approved', 'pricing_submitted'];
+    if (!rejectableStatuses.includes(req.status)) {
+      throw Object.assign(new Error('Cannot reject a request at this stage'), { status: 400 });
     }
     return requestsRepository.update(id, { status: 'rejected', rejectionReason: rejectionReason || null });
   },

@@ -8,3 +8,5 @@ requestsRouter.get('/:id', requestsController.getById);
 requestsRouter.post('/', requireRole('admin', 'sales', 'client'), requestsController.create);
 requestsRouter.patch('/:id/approve', requireRole('admin'), requestsController.approve);
 requestsRouter.patch('/:id/reject', requireRole('admin'), requestsController.reject);
+requestsRouter.patch('/:id/assign-pricing', requireRole('sales', 'admin'), requestsController.assignPricing);
+requestsRouter.patch('/:id/final-approve', requireRole('admin'), requestsController.finalApprove);

@@ -61,7 +61,7 @@ export async function openOrderModal(oid) {
       return `<div class="ditem${done?' done':''}" id="di_${i}">
         <div class="dchk${done?' on':''}" id="dc_${i}" ${can?`onclick="togDel('${oid}',${i})"` :'style="cursor:default"'}>${done?'✓':''}</div>
         <div class="ditem-info"><div class="ditem-name">${p.name}</div><div class="ditem-detail">[${p.colorCode}] ${p.colorName}</div></div>
-        <div class="ditem-qty">${p.delivered||0}/${p.qty} ${p.unit}</div>
+        <div class="ditem-qty">${p.delivered||0}/${p.qty} L</div>
       </div>`;
     }).join('');
     const pays = o.payments && o.payments.length
@@ -234,7 +234,7 @@ export async function printReceipt(oid) {
     <p>${o.clientName} · ${o.clientPhone}<br>${o.clientAddress}</p>
     <h3>Products</h3>
     <table><thead><tr><th>Product</th><th>Color</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
-    <tbody>${o.products.map(p=>`<tr><td>${p.name}</td><td>[${p.colorCode}] ${p.colorName}</td><td>${p.qty}${p.unit}</td><td>${fmtCur(p.price)}</td><td>${fmtCur(p.total)}</td></tr>`).join('')}
+    <tbody>${o.products.map(p=>`<tr><td>${p.name}</td><td>[${p.colorCode}] ${p.colorName}</td><td>${p.qty} L</td><td>${fmtCur(p.price)}</td><td>${fmtCur(p.total)}</td></tr>`).join('')}
     <tr class="total-row"><td colspan="4" style="text-align:right;padding-right:12px">Total</td><td>${fmtCur(o.totalAmount)}</td></tr>
     <tr><td colspan="4" style="text-align:right;padding-right:12px;color:#2e7d4f">Paid</td><td style="color:#2e7d4f">${fmtCur(o.paidAmount)}</td></tr>
     <tr><td colspan="4" style="text-align:right;padding-right:12px;color:#c0392b">Balance</td><td style="color:#c0392b">${fmtCur(o.totalAmount-o.paidAmount)}</td></tr>

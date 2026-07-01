@@ -12,5 +12,7 @@ export const requestsRepository = {
 
   update: (id, data) => prisma.request.update({ where: { id }, data, include }),
 
+  updateProduct: (id, data) => prisma.requestProduct.update({ where: { id }, data }),
+
   count: () => prisma.request.count(),
 };

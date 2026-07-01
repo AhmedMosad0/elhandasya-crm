@@ -20,12 +20,22 @@ export const requestsController = {
   },
 
   approve: async (req, res, next) => {
-    try { res.json(await requestsService.approve(req.params.id)); } catch (err) { next(err); }
+    try { res.json(await requestsService.approve(req.params.id, req.body || {})); } catch (err) { next(err); }
   },
 
   reject: async (req, res, next) => {
     try {
       res.json(await requestsService.reject(req.params.id, req.body.rejectionReason));
     } catch (err) { next(err); }
+  },
+
+  assignPricing: async (req, res, next) => {
+    try {
+      res.json(await requestsService.assignPricing(req.params.id, req.body.products, req.user.id));
+    } catch (err) { next(err); }
+  },
+
+  finalApprove: async (req, res, next) => {
+    try { res.json(await requestsService.finalApprove(req.params.id)); } catch (err) { next(err); }
   },
 };

@@ -56,10 +56,13 @@ export async function getClient(id)      { return _req('GET',  '/clients/' + id)
 export async function createClient(data) { return _req('POST', '/clients', data); }
 
 // ── Requests ──
-export async function getRequests()                      { return _req('GET',   '/requests'); }
-export async function createRequest(data)                { return _req('POST',  '/requests', data); }
-export async function approveRequest(id)                 { return _req('PATCH', '/requests/' + id + '/approve'); }
-export async function rejectRequest(id, rejectionReason) { return _req('PATCH', '/requests/' + id + '/reject', { rejectionReason }); }
+export async function getRequests()                          { return _req('GET',   '/requests'); }
+export async function getRequest(id)                         { return _req('GET',   '/requests/' + id); }
+export async function createRequest(data)                    { return _req('POST',  '/requests', data); }
+export async function approveRequest(id, body)               { return _req('PATCH', '/requests/' + id + '/approve', body); }
+export async function rejectRequest(id, rejectionReason)     { return _req('PATCH', '/requests/' + id + '/reject', { rejectionReason }); }
+export async function assignPricingRequest(id, products)     { return _req('PATCH', '/requests/' + id + '/assign-pricing', { products }); }
+export async function finalApproveRequest(id)                { return _req('PATCH', '/requests/' + id + '/final-approve'); }
 
 // ── Orders ──
 export async function getOrders() {

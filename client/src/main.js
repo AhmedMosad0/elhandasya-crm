@@ -9,6 +9,8 @@ import { renderDashboard } from './views/dashboard/dashboard.js';
 import {
   renderRequests, openNewRequestModal, approveRequest, promptReject, doReject,
   addPline, removePline, calcTotal, submitNewRequest, fillClient,
+  promptApproveWithSales, doApproveWithSales, doFinalApprove,
+  openPricingModal, calcPricingTotal, submitPricing,
 } from './views/requests/requests.js';
 import {
   renderOrders, openOrderModal, togDel, assignUser, updateOrderStatus,
@@ -32,6 +34,8 @@ Object.assign(window, {
   renderDashboard,
   renderRequests, openNewRequestModal, approveRequest, promptReject, doReject,
   addPline, removePline, calcTotal, submitNewRequest, fillClient,
+  promptApproveWithSales, doApproveWithSales, doFinalApprove,
+  openPricingModal, calcPricingTotal, submitPricing,
   renderOrders, openOrderModal, togDel, assignUser, updateOrderStatus,
   updatePayStatus, openAddPayment, savePayment, printReceipt,
   renderClients, openClientModal, openAddClient, saveNewClient,

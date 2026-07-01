@@ -28,7 +28,7 @@ export async function renderMyWork() {
 function _workCard(o, role, done) {
   return `<div class="work-card" style="${done ? 'opacity:.65' : ''}">
     <div class="work-head"><div><span class="work-recipe">${o.recipeNum}</span><div class="work-client">${o.clientName}</div><div class="work-note">${o.clientAddress}</div></div><div>${statusBadge(o.status)}</div></div>
-    <div style="font-size:12.5px;color:var(--mute);margin-bottom:10px">${o.products.map(p => `• ${p.name} — ${p.qty}${p.unit} [${p.colorCode}]`).join('<br>')}</div>
+    <div style="font-size:12.5px;color:var(--mute);margin-bottom:10px">${o.products.map(p => `• ${p.name} — ${p.qty} L [${p.colorCode}]`).join('<br>')}</div>
     ${role === 'mixer' && !done && o.status !== 'ready' ? `<button class="btn btn-gold btn-sm" onclick="markMixed('${o.id}')">✓ Mark Mixing Done</button>` : ''}
     <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="openOrderModal('${o.id}')">View Order</button>
   </div>`;
