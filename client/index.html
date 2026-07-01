@@ -1,13 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>El Handasya CRM</title>
-  <link rel="stylesheet" href="/src/styles/main.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Handasya — CRM Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=Readex+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body>
-  <h1>El Handasya CRM — scaffold ready</h1>
-  <script type="module" src="/src/main.js"></script>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-brand">
+      <div class="login-logo">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+          <path d="M26 3L49 15.5V36.5L26 49L3 36.5V15.5L26 3Z" fill="#201f23" stroke="#c9b298" stroke-width="1.5"/>
+          <path d="M15 17H18.5V25H33.5V17H37V35H33.5V27.5H18.5V35H15V17Z" fill="#c9b298"/>
+        </svg>
+        <div class="login-name">
+          <div class="login-title-big">El Handasya</div>
+          <div class="login-subtitle">Protective &amp; Decorative Paints</div>
+        </div>
+      </div>
+    </div>
+    <div class="login-divider"></div>
+    <div class="login-h" id="loginPanelTitle">Welcome Back</div>
+    <div class="login-sub" id="loginPanelSub">Sign in to your workspace</div>
+    <div class="lf-group">
+      <label class="lf-label">Username</label>
+      <input class="lf-input" id="loginUser" type="text" placeholder="e.g. admin" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="lf-group">
+      <label class="lf-label">Password</label>
+      <input class="lf-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="lf-btn" id="loginBtn" onclick="doLogin()">Sign In →</button>
+    <div class="lf-err" id="loginErr"></div>
+    <div class="login-hints" id="loginHints">
+      <div class="login-hints-title">Staff Accounts</div>
+      <div class="hint-row">⬛ Admin <span>admin / admin123</span></div>
+      <div class="hint-row">🟤 Sales <span>sales1 / sales123</span></div>
+      <div class="hint-row">🟡 Mixer <span>mixer1 / mix123</span></div>
+      <div class="hint-row">🟢 Delivery <span>delivery1 / del123</span></div>
+    </div>
+    <div class="login-portal-toggle" id="portalToggle">
+      Client? <a onclick="togglePortal()">Access Client Portal →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="appContainer" class="hidden">
+  <aside id="sidebar">
+    <div class="sb-head">
+      <div class="sb-brand">
+        <div class="sb-logo-wrap">
+          <svg width="38" height="38" viewBox="0 0 44 44" fill="none">
+            <path d="M22 2.5L40.5 12.8V31.2L22 41.5L3.5 31.2V12.8L22 2.5Z" fill="#2c2b30" stroke="rgba(201,178,152,0.35)" stroke-width="1"/>
+            <path d="M12.5 15H15.5V22H28.5V15H31.5V29H28.5V24H15.5V29H12.5V15Z" fill="#c9b298"/>
+          </svg>
+        </div>
+        <div>
+          <div class="sb-name">El Handasya</div>
+          <div class="sb-sub">CRM Portal</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sb-nav" id="sbNav"></nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar" id="sbAvatar"></div>
+        <div>
+          <div class="sb-uname" id="sbName"></div>
+          <div class="sb-urole" id="sbRole"></div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="logout()">↩ Sign Out</button>
+    </div>
+  </aside>
+
+  <div id="mainContent">
+    <div class="topbar">
+      <div class="tb-title" id="tbTitle">Dashboard</div>
+      <div class="tb-search">
+        <span style="color:var(--mute);font-size:14px">🔍</span>
+        <input placeholder="Search orders, clients…" id="searchInput" oninput="handleSearch()">
+      </div>
+      <div class="tb-notif" onclick="navigate('requests')">
+        🔔<div class="notif-dot" id="notifDot" style="display:none"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section" id="sectionDashboard"></div>
+      <div class="section" id="sectionRequests"></div>
+      <div class="section" id="sectionOrders"></div>
+      <div class="section" id="sectionClients"></div>
+      <div class="section" id="sectionReports"></div>
+      <div class="section" id="sectionMywork"></div>
+      <div class="section" id="sectionClientportal"></div>
+      <div class="section" id="sectionClientorders"></div>
+      <div class="section" id="sectionClientneworder"></div>
+      <div class="section" id="sectionClientaccount"></div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay" class="hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal modal-md" id="modalBox"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module" src="/src/main.js"></script>
 </body>
 </html>

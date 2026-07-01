@@ -1,4 +1,7 @@
-// Top bar component — placeholder.
-export function renderTopbar(container) {
-  // TODO: render top bar with user info and logout
+import { App } from '../../state/store.js';
+
+export function handleSearch() {
+  const q = document.getElementById('searchInput').value;
+  if (App.section === 'orders') window.renderOrders('all', q);
+  else if (App.section === 'clients') window.renderClients(q);
 }

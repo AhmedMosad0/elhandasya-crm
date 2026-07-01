@@ -1,5 +1,16 @@
-﻿// All Prisma calls for requests live here.
-// Controllers and services never call Prisma directly.
+import prisma from '../prisma/client.js';
+
+const include = { products: true, order: { select: { id: true, recipeNum: true } } };
+
 export const requestsRepository = {
-  // TODO: implement requests data access methods
+  findAll: (where) =>
+    prisma.request.findMany({ where, include, orderBy: { createdAt: 'desc' } }),
+
+  findById: (id) => prisma.request.findUnique({ where: { id }, include }),
+
+  create: (data) => prisma.request.create({ data, include }),
+
+  update: (id, data) => prisma.request.update({ where: { id }, data, include }),
+
+  count: () => prisma.request.count(),
 };

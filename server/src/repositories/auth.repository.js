@@ -1,5 +1,6 @@
-﻿// All Prisma calls for auth live here.
-// Controllers and services never call Prisma directly.
+import prisma from '../prisma/client.js';
+
 export const authRepository = {
-  // TODO: implement auth data access methods
+  findByUsername: (username) => prisma.user.findUnique({ where: { username } }),
+  findById: (id) => prisma.user.findUnique({ where: { id } }),
 };

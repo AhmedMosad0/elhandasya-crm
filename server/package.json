@@ -7,6 +7,10 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js"
   },
+  "prisma": {
+    "schema": "src/prisma/schema.prisma",
+    "seed": "node src/prisma/seed.js"
+  },
   "dependencies": {
     "@prisma/client": "^5.19.0",
     "bcrypt": "^5.1.1",

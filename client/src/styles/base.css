@@ -1,0 +1,27 @@
+:root {
+  --gold:#c9b298; --gold-d:#b09a80; --gold-l:#f7f2eb; --gold-ll:#fbf8f4;
+  --charcoal:#201f23; --slate:#464e52; --silver:#e5e5e4;
+  --ink:#201f23; --ink-2:#464e52; --mute:#7f7f7f;
+  --bg:#f4f3f0; --card:#ffffff; --border:#e5e5e4; --border-l:#f0efec;
+  --green:#2e7d4f; --green-l:#edf7f1;
+  --amber:#b45309; --amber-l:#fdf5e6;
+  --blue:#1e5590; --blue-l:#e8f0fb;
+  --red:#c0392b; --red-l:#fdecea;
+  --purple:#6d28d9; --purple-l:#f5f3ff;
+  --sidebar:#201f23; --sidebar-2:#2c2b30;
+  --r6:6px; --r8:8px; --r12:12px; --r16:16px;
+  --sh1:0 1px 3px rgba(32,31,35,.07);
+  --sh2:0 4px 12px rgba(32,31,35,.10);
+  --sh3:0 16px 40px rgba(32,31,35,.14);
+  --sw:268px; --th:60px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:13.5px;line-height:1.5}
+h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif}
+input,select,textarea,button{font-family:'DM Sans',inherit;font-size:13.5px}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--silver);border-radius:99px}
+@media print{#sidebar,.topbar,.mf,.rcard-actions,.ph-actions,.fbar,.btn{display:none!important}#mainContent{margin-left:0!important}}

@@ -1,3 +1,2 @@
-﻿export const paymentsController = {
-  // TODO: implement payments controller methods
-};
+// Payments are handled via POST /api/orders/:id/payments.
+export const paymentsController = {};

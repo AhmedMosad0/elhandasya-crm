@@ -1,0 +1,75 @@
+/* ── KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.kpi{background:white;border-radius:var(--r12);border:1px solid var(--border);padding:18px 20px;box-shadow:var(--sh1)}
+.kpi-label{font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.kpi-val{font-size:30px;font-weight:800;line-height:1;margin-bottom:4px;font-family:'Plus Jakarta Sans',sans-serif}
+.kpi-sub{font-size:12px;color:var(--mute)}
+.kpi-icon{float:right;font-size:26px;opacity:.1;margin-top:-2px}
+.kpi.kpi-gold .kpi-val{color:var(--gold-d)}
+.kpi.kpi-green .kpi-val{color:var(--green)}
+.kpi.kpi-blue .kpi-val{color:var(--blue)}
+.kpi.kpi-slate .kpi-val{color:var(--slate)}
+
+/* ── GENERIC CARD ── */
+.card{background:white;border-radius:var(--r12);border:1px solid var(--border);box-shadow:var(--sh1)}
+.ch{padding:16px 20px;border-bottom:1px solid var(--border-l);display:flex;align-items:center;justify-content:space-between}
+.ch h3{font-size:14px;font-weight:700}
+.cb{padding:18px 20px}
+
+/* ── REQUEST CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.rcard{background:white;border-radius:var(--r12);border:1px solid var(--border);padding:18px;box-shadow:var(--sh1);transition:all .15s}
+.rcard:hover{box-shadow:var(--sh2);transform:translateY(-2px)}
+.rcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px}
+.rcard-client{font-size:15px;font-weight:700}
+.rcard-ref{font-size:11px;color:var(--mute);margin-top:1px;font-family:monospace}
+.rcard-meta{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.rcard-meta-row{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--mute)}
+.rcard-products{background:var(--bg);border-radius:var(--r8);padding:10px 12px;margin-bottom:12px}
+.rcard-prod-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border-l)}
+.rcard-prod-row:last-child{border:none}
+.rcard-total{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px;padding-top:6px}
+.rcard-actions{display:flex;gap:7px;padding-top:10px;border-top:1px solid var(--border-l)}
+
+/* ── ORDER CARDS ── */
+.ocard{background:white;border-radius:var(--r12);border:1px solid var(--border);padding:18px;box-shadow:var(--sh1);cursor:pointer;transition:all .15s;border-left:4px solid transparent}
+.ocard:hover{box-shadow:var(--sh2);transform:translateY(-2px)}
+.ocard.oc-gold{border-left-color:var(--gold)}.ocard.oc-slate{border-left-color:var(--slate)}
+.ocard.oc-green{border-left-color:var(--green)}.ocard.oc-amber{border-left-color:var(--amber)}
+.ocard.oc-blue{border-left-color:var(--blue)}
+.ocard-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.recipe-tag{font-family:monospace;font-size:12px;font-weight:700;color:var(--charcoal);background:var(--gold-l);padding:3px 8px;border-radius:5px;border:1px solid rgba(201,178,152,.4)}
+.ocard-client{font-size:14.5px;font-weight:700;margin:6px 0 3px}
+.ocard-date{font-size:11.5px;color:var(--mute)}
+.ocard-badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.ocard-assign{display:flex;gap:14px;font-size:12px;color:var(--mute);margin-top:8px;padding-top:8px;border-top:1px solid var(--border-l)}
+.assignee{display:flex;align-items:center;gap:5px}
+.assignee-dot{width:18px;height:18px;border-radius:50%;background:var(--gold-l);color:var(--gold-d);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── PAY BAR ── */
+.pay-bar-wrap{background:var(--border);border-radius:20px;height:7px;overflow:hidden;margin:6px 0}
+.pay-bar-fill{height:100%;background:var(--green);border-radius:20px;transition:width .4s}
+.pay-mini{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mute)}
+
+/* ── CLIENT CARDS ── */
+.ccard{background:white;border-radius:var(--r12);border:1px solid var(--border);padding:18px;box-shadow:var(--sh1);transition:all .15s;cursor:pointer}
+.ccard:hover{box-shadow:var(--sh2);border-color:var(--gold)}
+.ccard-avatar{width:44px;height:44px;border-radius:50%;background:var(--gold-l);color:var(--gold-d);border:2px solid rgba(201,178,152,.4);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.ccard-name{font-size:14.5px;font-weight:700;margin-bottom:2px}
+.ccard-company{font-size:12px;color:var(--mute)}
+.ccard-meta{margin-top:10px;padding-top:10px;border-top:1px solid var(--border-l)}
+.ccard-stat{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--mute)}
+.ccard-stat strong{color:var(--ink);font-weight:700}
+
+/* ── MY WORK CARDS ── */
+.work-card{background:white;border-radius:var(--r12);border:1px solid var(--border);padding:18px;box-shadow:var(--sh1);margin-bottom:12px}
+.work-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.work-recipe{font-family:monospace;font-size:12px;color:var(--charcoal);background:var(--gold-l);padding:2px 8px;border-radius:4px;font-weight:700;border:1px solid rgba(201,178,152,.3)}
+.work-client{font-size:14.5px;font-weight:700}
+.work-note{font-size:12.5px;color:var(--mute);margin-top:3px}
+
+/* ── CLIENT PORTAL ORDER CARDS ── */
+.portal-order-card{background:white;border-radius:var(--r12);border:1px solid var(--border);padding:20px;box-shadow:var(--sh1);margin-bottom:14px;transition:all .15s;cursor:pointer}
+.portal-order-card:hover{box-shadow:var(--sh2)}
+.portal-order-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.portal-order-num{font-family:monospace;font-size:12px;font-weight:700;color:var(--charcoal);background:var(--gold-l);padding:3px 9px;border-radius:5px;border:1px solid rgba(201,178,152,.3)}

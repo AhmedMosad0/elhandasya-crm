@@ -1,0 +1,13 @@
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;margin-right:5px}
+.b-pending{background:#fdf5e6;color:#92400e}.b-pending::before{background:#92400e}
+.b-approved{background:#edf7f1;color:#155724}.b-approved::before{background:#155724}
+.b-rejected{background:var(--red-l);color:#7f1d1d}.b-rejected::before{background:#7f1d1d}
+.b-production{background:var(--blue-l);color:#1e3a5f}.b-production::before{background:#1e3a5f}
+.b-ready{background:var(--purple-l);color:#4c1d95}.b-ready::before{background:#4c1d95}
+.b-partial{background:#fdf5e6;color:#92400e}.b-partial::before{background:#92400e}
+.b-delivered{background:#edf7f1;color:#155724}.b-delivered::before{background:#155724}
+.b-paid{background:#edf7f1;color:#155724}.b-paid::before{background:#155724}
+.b-unpaid{background:var(--red-l);color:#7f1d1d}.b-unpaid::before{background:#7f1d1d}
+.b-waiting{background:#fdf5e6;color:#92400e}.b-waiting::before{background:#92400e}
+.b-direct{background:var(--gold-l);color:#7a6040}.b-direct::before{background:#7a6040}

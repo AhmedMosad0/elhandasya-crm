@@ -1,6 +1,10 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import { requestsController } from '../controllers/requests.controller.js';
+import { requireRole } from '../middleware/rbac.middleware.js';
 
 export const requestsRouter = Router();
-
-// TODO: define requests routes
+requestsRouter.get('/', requestsController.list);
+requestsRouter.get('/:id', requestsController.getById);
+requestsRouter.post('/', requireRole('admin', 'sales', 'client'), requestsController.create);
+requestsRouter.patch('/:id/approve', requireRole('admin'), requestsController.approve);
+requestsRouter.patch('/:id/reject', requireRole('admin'), requestsController.reject);

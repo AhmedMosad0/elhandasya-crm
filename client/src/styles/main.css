@@ -1,11 +1,11 @@
-/* Global styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: system-ui, sans-serif;
-  padding: 2rem;
-}
+@import './base.css';
+@import './login.css';
+@import './sidebar.css';
+@import './topbar.css';
+@import './layout.css';
+@import './modals.css';
+@import './badges.css';
+@import './tables.css';
+@import './cards.css';
+@import './forms.css';
+@import './views.css';

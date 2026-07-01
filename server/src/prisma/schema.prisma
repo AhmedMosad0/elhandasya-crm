@@ -1,14 +1,148 @@
-// This is a placeholder Prisma schema.
-// Run `npx prisma init` to set up the datasource block,
-// then define models here when the data layer is implemented.
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// Models will be added in the next phase.
+// Role:          admin | sales | mixer | delivery | client
+// RequestStatus: pending | approved | rejected
+// OrderStatus:   pending | mixing | partial | delivered | cancelled
+// PaymentStatus: unpaid | partial | paid
+// OrderSource:   sales | client
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  role           String
+  username       String   @unique
+  passwordHash   String
+  avatarInitials String
+  clientId       String?
+  createdAt      DateTime @default(now())
+
+  clientRecord Client?       @relation(fields: [clientId], references: [id])
+  requests     Request[]
+  activityLogs ActivityLog[]
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  address   String
+  company   String?
+  createdAt DateTime @default(now())
+
+  users    User[]
+  requests Request[]
+  orders   Order[]
+}
+
+model Request {
+  id              String   @id @default(cuid())
+  ref             String   @unique
+  clientId        String
+  clientName      String
+  phone           String
+  email           String?
+  address         String
+  totalAmount     Float
+  notes           String?
+  status          String   @default("pending")
+  rejectionReason String?
+  createdBy       String
+  salesName       String
+  createdAt       DateTime @default(now())
+
+  client   Client           @relation(fields: [clientId], references: [id])
+  creator  User             @relation(fields: [createdBy], references: [id])
+  products RequestProduct[]
+  order    Order?
+}
+
+model RequestProduct {
+  id        String @id @default(cuid())
+  requestId String
+  name      String
+  colorCode String
+  colorName String
+  qty       Float
+  unit      String
+  price     Float
+  total     Float
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  recipeNum     String   @unique
+  requestId     String?  @unique
+  source        String
+  clientId      String
+  clientName    String
+  clientPhone   String
+  clientAddress String
+  totalAmount   Float
+  paidAmount    Float    @default(0)
+  paymentStatus String   @default("unpaid")
+  status        String   @default("pending")
+  mixerId       String?
+  mixerName     String?
+  deliveryId    String?
+  deliveryName  String?
+  salesId       String?
+  salesName     String?
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  client   Client         @relation(fields: [clientId], references: [id])
+  request  Request?       @relation(fields: [requestId], references: [id])
+  products OrderProduct[]
+  payments Payment[]
+  activity ActivityLog[]
+}
+
+model OrderProduct {
+  id        String @id @default(cuid())
+  orderId   String
+  name      String
+  colorCode String
+  colorName String
+  qty       Float
+  unit      String
+  price     Float
+  total     Float
+  delivered Float  @default(0)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  orderId   String
+  amount    Float
+  date      String
+  note      String?
+  by        String
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  orderId   String
+  text      String
+  time      String
+  userId    String?
+  userName  String
+  createdAt DateTime @default(now())
+
+  order Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User?  @relation(fields: [userId], references: [id])
+}

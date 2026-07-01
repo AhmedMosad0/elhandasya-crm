@@ -1,5 +1,10 @@
-﻿// All Prisma calls for users live here.
-// Controllers and services never call Prisma directly.
+import prisma from '../prisma/client.js';
+
 export const usersRepository = {
-  // TODO: implement users data access methods
+  findAll: () => prisma.user.findMany({ orderBy: { createdAt: 'asc' } }),
+  findById: (id) => prisma.user.findUnique({ where: { id } }),
+  findByUsername: (username) => prisma.user.findUnique({ where: { username } }),
+  create: (data) => prisma.user.create({ data }),
+  update: (id, data) => prisma.user.update({ where: { id }, data }),
+  delete: (id) => prisma.user.delete({ where: { id } }),
 };

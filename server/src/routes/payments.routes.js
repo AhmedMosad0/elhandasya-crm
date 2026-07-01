@@ -1,6 +1,4 @@
-﻿import { Router } from 'express';
-import { paymentsController } from '../controllers/payments.controller.js';
-
+// Payments are a sub-resource of orders: POST /api/orders/:id/payments
+// No standalone /api/payments routes needed.
+import { Router } from 'express';
 export const paymentsRouter = Router();
-
-// TODO: define payments routes

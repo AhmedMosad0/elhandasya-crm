@@ -1,0 +1,33 @@
+.content{flex:1;padding:24px}
+.section{display:none}
+.section.active{display:block}
+
+/* ── PAGE HEADER ── */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px}
+.ph-info h2{font-size:20px;font-weight:800}
+.ph-info p{color:var(--mute);font-size:12.5px;margin-top:2px}
+.ph-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 17px;border-radius:var(--r8);border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;white-space:nowrap}
+.btn-primary{background:var(--charcoal);color:white}.btn-primary:hover{background:var(--slate)}
+.btn-gold{background:var(--gold);color:var(--charcoal)}.btn-gold:hover{background:var(--gold-d)}
+.btn-ghost{background:white;color:var(--ink-2);border:1.5px solid var(--border)}.btn-ghost:hover{background:var(--bg)}
+.btn-green{background:var(--green);color:white}.btn-green:hover{background:#235e3b}
+.btn-danger{background:var(--red);color:white}.btn-danger:hover{background:#9b2e22}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:6px}
+.btn-xs{padding:4px 9px;font-size:11px;border-radius:5px;font-weight:600}
+
+/* ── LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.divider{height:1px;background:var(--border-l);margin:18px 0}
+.empty{text-align:center;padding:48px 20px;color:var(--mute)}
+.empty-icon{font-size:46px;margin-bottom:12px}
+.empty h4{font-size:16px;color:var(--ink);font-weight:700;margin-bottom:5px}
+.empty p{font-size:13px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--charcoal);color:white;padding:12px 18px;border-radius:var(--r8);font-size:13px;font-weight:600;z-index:9999;box-shadow:var(--sh3);transform:translateY(100px);opacity:0;transition:all .25s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.toast-green{background:var(--green)}
+.toast.toast-gold{background:var(--gold-d);color:white}
+.toast.toast-red{background:var(--red)}

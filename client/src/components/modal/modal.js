@@ -1,8 +1,10 @@
-// Reusable modal component — placeholder.
-export function openModal(content) {
-  // TODO: render modal overlay with content
+export function openModal(html, cls = 'modal-md') {
+  const b = document.getElementById('modalBox');
+  b.className = 'modal ' + cls;
+  b.innerHTML = html;
+  document.getElementById('overlay').classList.remove('hidden');
 }
 
 export function closeModal() {
-  // TODO: hide modal overlay
+  document.getElementById('overlay').classList.add('hidden');
 }
