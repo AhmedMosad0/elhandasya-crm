@@ -1,5 +1,5 @@
 import { App } from '../state/store.js';
-import { getUsers, getSession, saveSession, clearSession } from '../api/index.js';
+import * as api from '../api/index.js';
 
 export let _portalMode = false;
 
@@ -42,40 +42,60 @@ export function togglePortal() {
   }
 }
 
-export function doLogin() {
+export async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
-  const found = getUsers().find(x => x.username === u && x.pw === p);
-  if (!found) { document.getElementById('loginErr').textContent = '❌ Wrong username or password.'; return; }
-  App.user = found;
-  saveSession(found);
-  // showApp is called from main.js — imported lazily to avoid circular refs
-  window._showApp();
+  document.getElementById('loginErr').textContent = '';
+  try {
+    const user = await api.login(u, p);
+    App.user = { ...user, av: user.avatarInitials };
+    window._showApp();
+  } catch (err) {
+    document.getElementById('loginErr').textContent = '❌ ' + (err.message || 'Wrong username or password.');
+  }
 }
 
 export function logout() {
   App.user = null;
-  clearSession();
+  api.clearToken();
   document.getElementById('appContainer').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
   ['loginUser', 'loginPass'].forEach(id => (document.getElementById(id).value = ''));
   document.getElementById('loginErr').textContent = '';
 }
 
-export function showApp() {
+export async function showApp() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('appContainer').classList.remove('hidden');
   const u = App.user;
   document.getElementById('sbAvatar').textContent = u.av;
   document.getElementById('sbName').textContent = u.name;
   document.getElementById('sbRole').textContent = roleLabel(u.role);
-  // renderNav, updateNotifDot, navigate resolved via window to avoid circular import
-  window._renderNav();
+  // Await nav so nav-items exist before navigate() tries to mark one active
+  await window._renderNav();
   window._updateNotifDot();
   window.navigate(defaultSection(u.role));
 }
 
-export function checkSession() {
-  const sv = getSession();
-  if (sv) { App.user = sv; window._showApp(); }
+export async function checkSession() {
+  const tok = api.getToken();
+  if (!tok) return;
+  try {
+    const user = await api.getMe();
+    App.user = { ...user, av: user.avatarInitials };
+    window._showApp();
+  } catch {
+    api.clearToken();
+  }
 }
+
+// Any 401 from the API layer clears state and surfaces the login screen
+window.addEventListener('session-expired', () => {
+  App.user = null;
+  const app   = document.getElementById('appContainer');
+  const login = document.getElementById('loginScreen');
+  const err   = document.getElementById('loginErr');
+  if (app)   app.classList.add('hidden');
+  if (login) login.classList.remove('hidden');
+  if (err)   err.textContent = '❌ Session expired — please sign in again.';
+});

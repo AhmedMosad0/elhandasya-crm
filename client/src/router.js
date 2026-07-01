@@ -17,7 +17,7 @@ const TITLES = {
   clientorders:'My Orders', clientneworder:'Place New Order', clientaccount:'My Account',
 };
 
-export function navigate(sec, ...args) {
+export async function navigate(sec, ...args) {
   App.section = sec;
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -27,14 +27,14 @@ export function navigate(sec, ...args) {
   if (nv) nv.classList.add('active');
   document.getElementById('tbTitle').textContent = TITLES[sec] || sec;
 
-  if (sec === 'dashboard') renderDashboard();
-  else if (sec === 'requests') renderRequests(args[0] || 'all');
-  else if (sec === 'orders') renderOrders(args[0] || 'all');
-  else if (sec === 'clients') renderClients();
-  else if (sec === 'reports') renderReports();
-  else if (sec === 'mywork') renderMyWork();
-  else if (sec === 'clientportal') renderClientPortal();
-  else if (sec === 'clientorders') renderClientOrders(args[0] || 'all');
-  else if (sec === 'clientneworder') renderClientNewOrder();
-  else if (sec === 'clientaccount') renderClientAccount();
+  if (sec === 'dashboard')       await renderDashboard();
+  else if (sec === 'requests')   await renderRequests(args[0] || 'all');
+  else if (sec === 'orders')     await renderOrders(args[0] || 'all');
+  else if (sec === 'clients')    await renderClients();
+  else if (sec === 'reports')    await renderReports();
+  else if (sec === 'mywork')     await renderMyWork();
+  else if (sec === 'clientportal')   await renderClientPortal();
+  else if (sec === 'clientorders')   await renderClientOrders(args[0] || 'all');
+  else if (sec === 'clientneworder') await renderClientNewOrder();
+  else if (sec === 'clientaccount')  await renderClientAccount();
 }

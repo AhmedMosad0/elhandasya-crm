@@ -1,4 +1,3 @@
-import { seedData } from './api/index.js';
 import { doLogin, logout, togglePortal, showApp, checkSession } from './auth/auth.js';
 import { navigate } from './router.js';
 import { openModal, closeModal } from './components/modal/modal.js';
@@ -23,8 +22,7 @@ import { renderClientOrders, openClientOrderDetail } from './views/client-orders
 import { renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder } from './views/client-neworder/client-neworder.js';
 import { renderClientAccount } from './views/client-account/client-account.js';
 
-// Wire functions referenced from inline onclick/oninput attributes (static
-// HTML in index.html and dynamically generated view markup) onto window.
+// Wire functions referenced from inline onclick/oninput attributes onto window.
 Object.assign(window, {
   doLogin, logout, togglePortal, navigate, handleSearch,
   openModal, closeModal, showToast,
@@ -46,6 +44,5 @@ Object.assign(window, {
 });
 
 window.onload = () => {
-  seedData();
   checkSession();
 };
