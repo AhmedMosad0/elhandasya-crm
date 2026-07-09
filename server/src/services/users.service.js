@@ -14,6 +14,13 @@ export const usersService = {
     if (!name || !role || !username || !password) {
       throw Object.assign(new Error('name, role, username, password are required'), { status: 400 });
     }
+    if (password.length < 8) {
+      throw Object.assign(new Error('Password must be at least 8 characters'), { status: 400 });
+    }
+    const VALID_ROLES = ['admin', 'sales', 'mixer', 'delivery', 'client'];
+    if (!VALID_ROLES.includes(role)) {
+      throw Object.assign(new Error('Invalid role'), { status: 400 });
+    }
     const existing = await usersRepository.findByUsername(username);
     if (existing) throw Object.assign(new Error('Username already taken'), { status: 409 });
 
@@ -27,6 +34,13 @@ export const usersService = {
 
   async update(id, { name, role, username, password, avatarInitials, clientId }) {
     await usersService.getById(id);
+    const VALID_ROLES = ['admin', 'sales', 'mixer', 'delivery', 'client'];
+    if (role !== undefined && !VALID_ROLES.includes(role)) {
+      throw Object.assign(new Error('Invalid role'), { status: 400 });
+    }
+    if (password && password.length < 8) {
+      throw Object.assign(new Error('Password must be at least 8 characters'), { status: 400 });
+    }
     const data = {};
     if (name !== undefined) data.name = name;
     if (role !== undefined) data.role = role;

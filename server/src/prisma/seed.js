@@ -40,13 +40,14 @@ async function main() {
     ],
   });
 
+  // Seed passwords — change these after first login in any real environment.
   const hashes = await Promise.all([
-    bcrypt.hash('admin123',  ROUNDS),
-    bcrypt.hash('sales123',  ROUNDS),
-    bcrypt.hash('pass123',   ROUNDS),
-    bcrypt.hash('mix123',    ROUNDS),
-    bcrypt.hash('del123',    ROUNDS),
-    bcrypt.hash('client123', ROUNDS),
+    bcrypt.hash('EH-Admin@2024',  ROUNDS),
+    bcrypt.hash('EH-Sales1@2024', ROUNDS),
+    bcrypt.hash('EH-Sales2@2024', ROUNDS),
+    bcrypt.hash('EH-Mixer@2024!', ROUNDS),
+    bcrypt.hash('EH-Deliv@2024!', ROUNDS),
+    bcrypt.hash('EH-Client2024!', ROUNDS),
   ]);
 
   await prisma.user.createMany({

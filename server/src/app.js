@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.routes.js';
 import { usersRouter } from './routes/users.routes.js';
@@ -12,6 +13,7 @@ import { errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
 
+app.use(helmet());
 app.use(cors({ origin: '*', methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
 app.options('*', cors({ origin: '*' }));
 app.use(express.json());

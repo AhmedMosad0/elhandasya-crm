@@ -37,6 +37,9 @@ export const authService = {
     if (!name || !username || !password || !phone || !role) {
       throw Object.assign(new Error('name, username, password, phone, role are required'), { status: 400 });
     }
+    if (password.length < 8) {
+      throw Object.assign(new Error('Password must be at least 8 characters'), { status: 400 });
+    }
     const allowed = ['client', 'sales', 'mixer', 'delivery'];
     if (!allowed.includes(role)) {
       throw Object.assign(new Error('Invalid role'), { status: 400 });
