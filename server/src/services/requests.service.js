@@ -36,17 +36,9 @@ async function _createOrderFromRequest(req, source) {
 
 export const requestsService = {
   list(user) {
-    let where = {};
-    if (user.role === 'sales') {
-      where = { OR: [
-        { createdBy: user.id },
-        { assignedSalesId: user.id, status: 'approved' },
-        // Unclaimed consultations visible to all salesmen
-        { requestType: 'consultation', status: 'pending', assignedSalesId: null },
-      ]};
-    } else if (user.role === 'client') {
-      where = { clientId: user.clientId };
-    }
+    // Sales sees all requests (full pipeline view)
+    // Client only sees their own
+    const where = user.role === 'client' ? { clientId: user.clientId } : {};
     return requestsRepository.findAll(where);
   },
 
@@ -195,5 +187,32 @@ export const requestsService = {
       throw Object.assign(new Error('Cannot reject a request at this stage'), { status: 400 });
     }
     return requestsRepository.update(id, { status: 'rejected', rejectionReason: rejectionReason || null });
+  },
+
+  async callStatus(id, { callStatus, callStatusNote }, user) {
+    const VALID = ['callback', 'following', 'no_answer', 'low_budget', 'lead', 'out_of_zone'];
+    if (!VALID.includes(callStatus)) {
+      throw Object.assign(new Error('Invalid call status. Must be one of: ' + VALID.join(', ')), { status: 400 });
+    }
+    const req = await requestsRepository.findById(id);
+    if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
+    return requestsRepository.update(id, {
+      callStatus,
+      callStatusNote: callStatusNote || null,
+      callStatusAt: new Date(),
+      callStatusBy: user.name,
+    });
+  },
+
+  async updateAdminNotes(id, adminNotes) {
+    const req = await requestsRepository.findById(id);
+    if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
+    return requestsRepository.update(id, { adminNotes: adminNotes || null });
+  },
+
+  async setClaimWithoutPayment(id, value) {
+    const req = await requestsRepository.findById(id);
+    if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
+    return requestsRepository.update(id, { claimWithoutPayment: Boolean(value) });
   },
 };

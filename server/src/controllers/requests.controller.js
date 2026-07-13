@@ -42,4 +42,16 @@ export const requestsController = {
   claim: async (req, res, next) => {
     try { res.json(await requestsService.claim(req.params.id, req.user)); } catch (err) { next(err); }
   },
+
+  callStatus: async (req, res, next) => {
+    try { res.json(await requestsService.callStatus(req.params.id, req.body, req.user)); } catch (err) { next(err); }
+  },
+
+  updateAdminNotes: async (req, res, next) => {
+    try { res.json(await requestsService.updateAdminNotes(req.params.id, req.body.adminNotes)); } catch (err) { next(err); }
+  },
+
+  setClaimWithoutPayment: async (req, res, next) => {
+    try { res.json(await requestsService.setClaimWithoutPayment(req.params.id, req.body.claimWithoutPayment)); } catch (err) { next(err); }
+  },
 };

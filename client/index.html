@@ -30,27 +30,26 @@
 
     <!-- ── LOGIN FORM ── -->
     <div id="loginForm">
-      <div class="login-h" id="loginPanelTitle">Welcome Back</div>
-      <div class="login-sub" id="loginPanelSub">Sign in to your workspace</div>
+      <div class="login-h" id="loginPanelTitle">Client Portal</div>
+      <div class="login-sub" id="loginPanelSub">Sign in to place and track your orders</div>
       <div class="lf-group">
         <label class="lf-label">Username</label>
-        <input class="lf-input" id="loginUser" type="text" placeholder="e.g. admin" onkeydown="if(event.key==='Enter')doLogin()">
+        <input class="lf-input" id="loginUser" type="text" placeholder="e.g. hassan" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <div class="lf-group">
         <label class="lf-label">Password</label>
         <input class="lf-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <button class="lf-btn" id="loginBtn" onclick="doLogin()">Sign In →</button>
+      <button class="lf-btn lf-btn-client" id="loginBtn" onclick="doLogin()">Access My Portal →</button>
       <div class="lf-err" id="loginErr"></div>
       <div class="login-hints" id="loginHints">
-        <div class="login-hints-title">Staff Accounts</div>
-        <div class="hint-row">⬛ Admin <span>admin / admin123</span></div>
-        <div class="hint-row">🟤 Sales <span>sales1 / sales123</span></div>
-        <div class="hint-row">🟡 Mixer <span>mixer1 / mix123</span></div>
-        <div class="hint-row">🟢 Delivery <span>delivery1 / del123</span></div>
+        <div class="login-hints-title">Client Accounts</div>
+        <div class="hint-row">👤 Hassan El-Sayed <span>hassan / client123</span></div>
+        <div class="hint-row">👤 Layla Mostafa <span>layla / client123</span></div>
+        <div class="hint-row">👤 Khaled Nour <span>khaled / client123</span></div>
       </div>
       <div class="login-portal-toggle" id="portalToggle">
-        Client? <a onclick="togglePortal()">Access Client Portal →</a>
+        Staff? <a onclick="togglePortal()">Staff Login →</a>
       </div>
       <div class="login-signup-links">
         <div>New client? <a onclick="showSignup('client')">Create account →</a></div>
@@ -81,10 +80,8 @@
       <div class="lf-group">
         <label class="lf-label">I am a…</label>
         <div class="signup-role-toggle">
-          <button id="signupRoleBtn_client"   class="role-btn active" onclick="selectSignupRole('client')">Client</button>
-          <button id="signupRoleBtn_sales"    class="role-btn"        onclick="selectSignupRole('sales')">Sales</button>
-          <button id="signupRoleBtn_mixer"    class="role-btn"        onclick="selectSignupRole('mixer')">Mixer</button>
-          <button id="signupRoleBtn_delivery" class="role-btn"        onclick="selectSignupRole('delivery')">Delivery</button>
+          <button id="signupRoleBtn_client" class="role-btn active" onclick="selectSignupRole('client')">Client</button>
+          <button id="signupRoleBtn_sales"  class="role-btn"        onclick="selectSignupRole('sales')">Sales</button>
         </div>
       </div>
       <div id="signupClientFields">

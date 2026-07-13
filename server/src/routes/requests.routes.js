@@ -11,3 +11,6 @@ requestsRouter.patch('/:id/reject', requireRole('admin'), requestsController.rej
 requestsRouter.patch('/:id/assign-pricing', requireRole('sales', 'admin'), requestsController.assignPricing);
 requestsRouter.patch('/:id/final-approve', requireRole('admin'), requestsController.finalApprove);
 requestsRouter.patch('/:id/claim', requireRole('sales', 'admin'), requestsController.claim);
+requestsRouter.patch('/:id/call-status', requireRole('sales', 'admin'), requestsController.callStatus);
+requestsRouter.patch('/:id/admin-notes', requireRole('admin'), requestsController.updateAdminNotes);
+requestsRouter.patch('/:id/claim-without-payment', requireRole('admin'), requestsController.setClaimWithoutPayment);

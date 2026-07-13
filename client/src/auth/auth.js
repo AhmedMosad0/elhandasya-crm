@@ -1,7 +1,7 @@
 import { App } from '../state/store.js';
 import * as api from '../api/index.js';
 
-export let _portalMode = false;
+export let _portalMode = true; // client portal is the default
 let _signupRole = 'client';
 
 export function roleLabel(r) {
@@ -12,12 +12,13 @@ export function defaultSection(role) {
   if (role === 'admin') return 'dashboard';
   if (role === 'sales') return 'requests';
   if (role === 'client') return 'clientportal';
-  return 'mywork';
+  return 'dashboard';
 }
 
 export function togglePortal() {
   _portalMode = !_portalMode;
   if (_portalMode) {
+    // Client portal (default)
     document.getElementById('loginPanelTitle').textContent = 'Client Portal';
     document.getElementById('loginPanelSub').textContent = 'Sign in to place and track your orders';
     document.getElementById('loginBtn').textContent = 'Access My Portal →';
@@ -27,19 +28,18 @@ export function togglePortal() {
       <div class="hint-row">👤 Hassan El-Sayed <span>hassan / client123</span></div>
       <div class="hint-row">👤 Layla Mostafa <span>layla / client123</span></div>
       <div class="hint-row">👤 Khaled Nour <span>khaled / client123</span></div>`;
-    document.getElementById('portalToggle').innerHTML = 'Staff? <a onclick="togglePortal()">← Back to Staff Login</a>';
+    document.getElementById('portalToggle').innerHTML = 'Staff? <a onclick="togglePortal()">Staff Login →</a>';
   } else {
-    document.getElementById('loginPanelTitle').textContent = 'Welcome Back';
+    // Staff login
+    document.getElementById('loginPanelTitle').textContent = 'Staff Login';
     document.getElementById('loginPanelSub').textContent = 'Sign in to your workspace';
     document.getElementById('loginBtn').textContent = 'Sign In →';
     document.getElementById('loginBtn').className = 'lf-btn';
     document.getElementById('loginHints').innerHTML = `
       <div class="login-hints-title">Staff Accounts</div>
       <div class="hint-row">⬛ Admin <span>admin / admin123</span></div>
-      <div class="hint-row">🟤 Sales <span>sales1 / sales123</span></div>
-      <div class="hint-row">🟡 Mixer <span>mixer1 / mix123</span></div>
-      <div class="hint-row">🟢 Delivery <span>delivery1 / del123</span></div>`;
-    document.getElementById('portalToggle').innerHTML = 'Client? <a onclick="togglePortal()">Access Client Portal →</a>';
+      <div class="hint-row">🟤 Sales <span>sales1 / sales123</span></div>`;
+    document.getElementById('portalToggle').innerHTML = '← <a onclick="togglePortal()">Back to Client Portal</a>';
   }
 }
 
@@ -83,7 +83,7 @@ export function showLogin() {
 
 export function selectSignupRole(role) {
   _signupRole = role;
-  ['client', 'sales', 'mixer', 'delivery'].forEach(r => {
+  ['client', 'sales'].forEach(r => {
     const btn = document.getElementById('signupRoleBtn_' + r);
     if (btn) btn.classList.toggle('active', r === role);
   });
@@ -151,7 +151,6 @@ export async function showApp() {
   document.getElementById('sbAvatar').textContent = u.av;
   document.getElementById('sbName').textContent = u.name;
   document.getElementById('sbRole').textContent = roleLabel(u.role);
-  // Await nav so nav-items exist before navigate() tries to mark one active
   await window._renderNav();
   window._updateNotifDot();
   window.navigate(defaultSection(u.role));

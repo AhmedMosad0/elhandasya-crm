@@ -76,6 +76,16 @@ model Request {
   apartmentArea Float?
   consultNotes  String?
 
+  // Call/contact status tracking
+  callStatus     String?
+  callStatusNote String?
+  callStatusAt   DateTime?
+  callStatusBy   String?
+
+  // Admin flags
+  claimWithoutPayment Boolean  @default(false)
+  adminNotes          String?
+
   client   Client           @relation(fields: [clientId], references: [id])
   creator  User             @relation(fields: [createdBy], references: [id])
   products RequestProduct[]

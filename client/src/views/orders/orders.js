@@ -33,31 +33,31 @@ export async function renderOrders(filter, q) {
 function _orderCard(o) {
   const pct = o.totalAmount > 0 ? Math.round(o.paidAmount / o.totalAmount * 100) : 0;
   const bc = { pending:'oc-gold', mixing:'oc-blue', ready:'oc-slate', partial:'oc-amber', delivered:'oc-green' }[o.status] || 'oc-gold';
+  const cwpBadge = o.claimWithoutPayment
+    ? `<div style="font-size:10px;color:#c2410c;font-weight:700;margin-top:3px">⚠ Claim w/o Payment</div>`
+    : '';
   return `<div class="ocard ${bc}" onclick="openOrderModal('${o.id}')">
     <div class="ocard-head"><span class="recipe-tag">${o.recipeNum}</span>${o.source==='client'?`<span class="badge b-direct" style="font-size:10px">Client Portal</span>`:statusBadge(o.status)}</div>
     <div class="ocard-client">${o.clientName}</div><div class="ocard-date">${fmtDate(o.createdAt)}</div>
     <div class="ocard-badges">${statusBadge(o.status)}${payBadge(o.paymentStatus)}</div>
     <div class="pay-bar-wrap"><div class="pay-bar-fill" style="width:${pct}%"></div></div>
     <div class="pay-mini"><span>${fmtCur(o.paidAmount)} paid</span><span>${pct}%</span></div>
-    <div class="ocard-assign"><span class="assignee"><span class="assignee-dot">M</span>${o.mixerName||'Unassigned'}</span>
-      <span class="assignee"><span class="assignee-dot">D</span>${o.deliveryName||'Unassigned'}</span></div>
+    ${cwpBadge}
   </div>`;
 }
 
 export async function openOrderModal(oid) {
   try {
     const isAdmin = App.user.role === 'admin';
+    const isSales = App.user.role === 'sales';
     const [o, users] = await Promise.all([
       api.getOrder(oid),
       isAdmin ? api.getUsers() : Promise.resolve([]),
     ]);
     if (!o) return;
-    const canDel  = App.user.role === 'delivery' && o.deliveryId === App.user.id;
-    const mixers  = users.filter(u => u.role === 'mixer');
-    const delvrs  = users.filter(u => u.role === 'delivery');
     const pct = o.totalAmount > 0 ? Math.round(o.paidAmount / o.totalAmount * 100) : 0;
     const ditems = o.products.map((p, i) => {
-      const done = p.delivered >= p.qty; const can = isAdmin || canDel;
+      const done = p.delivered >= p.qty; const can = isAdmin || isSales;
       return `<div class="ditem${done?' done':''}" id="di_${i}">
         <div class="dchk${done?' on':''}" id="dc_${i}" ${can?`onclick="togDel('${oid}',${i})"` :'style="cursor:default"'}>${done?'✓':''}</div>
         <div class="ditem-info"><div class="ditem-name">${p.name}</div><div class="ditem-detail">[${p.colorCode}] ${p.colorName}</div></div>
@@ -68,20 +68,17 @@ export async function openOrderModal(oid) {
       ? o.payments.map(pay => `<div class="pay-entry"><div><strong>${fmtCur(pay.amount)}</strong><div class="pe-meta">${pay.note||'—'}</div></div><div style="text-align:right"><div class="pe-amount">${fmtCur(pay.amount)}</div><div class="pe-meta">${pay.date}</div></div></div>`).join('')
       : `<div style="color:var(--mute);font-size:13px;padding:10px 0">No payments recorded yet</div>`;
     const acts = (o.activity || []).slice().reverse().map(a => `<div class="act-item"><div class="act-dot"></div><div class="act-body">${a.text}<div class="act-time">${a.time} · ${a.user}</div></div></div>`).join('');
+    const cwpBadge = o.claimWithoutPayment
+      ? `<div style="background:#fff7ed;border:1px solid #f97316;border-radius:6px;padding:7px 10px;font-size:12.5px;color:#c2410c;font-weight:600;margin-bottom:12px">⚠ Claim Without Payment Authorized</div>`
+      : '';
+    const salesList = isAdmin ? users.filter(u => u.role === 'sales') : [];
     const assignSec = isAdmin ? `
       <div class="fsec">Assignments</div>
-      <div class="assign-grid">
-        <div class="assign-card"><div class="assign-role">Color Mixer</div>
-          <select onchange="assignUser('${oid}','mixer',this.value)">
-            <option value="">— Unassigned —</option>
-            ${mixers.map(m=>`<option value="${m.id}"${o.mixerId===m.id?' selected':''}>${m.name}</option>`).join('')}
-          </select></div>
-        <div class="assign-card"><div class="assign-role">Delivery Agent</div>
-          <select onchange="assignUser('${oid}','delivery',this.value)">
-            <option value="">— Unassigned —</option>
-            ${delvrs.map(d=>`<option value="${d.id}"${o.deliveryId===d.id?' selected':''}>${d.name}</option>`).join('')}
-          </select></div>
-      </div>
+      ${salesList.length ? `<div class="fg" style="margin-bottom:12px"><label class="fl">Sales Rep</label>
+        <select class="fi" onchange="assignUser('${oid}','sales',this.value)">
+          <option value="">— Unassigned —</option>
+          ${salesList.map(s=>`<option value="${s.id}"${o.salesId===s.id?' selected':''}>${s.name}</option>`).join('')}
+        </select></div>` : ''}
       <div class="fr2">
         <div class="fg"><label class="fl">Order Status</label>
           <select class="fi" onchange="updateOrderStatus('${oid}',this.value)">
@@ -108,6 +105,7 @@ export async function openOrderModal(oid) {
           <div class="info-row"><span class="ir-label">Date</span><span class="ir-val">${fmtDate(o.createdAt)}</span></div>
         </div>
       </div>
+      ${cwpBadge}
       <div class="fsec">Delivery Tracking</div>
       <div id="deliveryItems">${ditems}</div>
       <div class="fsec">Payment</div>
@@ -120,7 +118,7 @@ export async function openOrderModal(oid) {
         <div class="pay-bar-wrap" style="height:9px"><div class="pay-bar-fill" style="width:${pct}%"></div></div>
         <div class="pay-mini"><span>${pct}% collected</span></div>
         <div class="pay-list" style="margin-top:12px">${pays}</div>
-        ${isAdmin?`<button class="btn btn-green btn-sm" style="margin-top:8px" onclick="openAddPayment('${oid}')">＋ Add Payment</button>`:''}
+        ${(isAdmin||isSales)?`<button class="btn btn-green btn-sm" style="margin-top:8px" onclick="openAddPayment('${oid}')">＋ Add Payment</button>`:''}
       </div>
       ${assignSec}
       <div class="fsec">Activity Log</div>

@@ -6,7 +6,7 @@ import { showToast } from '../../components/toast/toast.js';
 import { openProductPicker } from '../../components/ProductPicker/product-picker.js';
 
 let _plc  = 1;
-let _cplc = 1; // consultation pricing line counter
+let _cplc = 1;
 let _cid  = null;
 let _clientsCache = [];
 let _reqsCache    = [];
@@ -19,6 +19,103 @@ const STATUS_LABEL = {
   rejected:          'Not Approved',
 };
 
+// ── Call status config ──
+const CS_CFG = {
+  callback:    { label: '📞 Callback',     color: '#b45309', bg: '#fdf3dc' },
+  following:   { label: '👀 Following Up',  color: '#1d4ed8', bg: '#eff6ff' },
+  no_answer:   { label: '📵 No Answer',     color: '#6b7280', bg: '#f3f4f6' },
+  low_budget:  { label: '💸 Low Budget',    color: '#c2410c', bg: '#fff7ed' },
+  lead:        { label: '🆕 New Lead',      color: '#15803d', bg: '#f0fdf4' },
+  out_of_zone: { label: '🚫 Out of Zone',   color: '#b91c1c', bg: '#fef2f2' },
+};
+
+// ── Shared helpers ──
+function _isDelayed(r) {
+  const OPEN = ['pending', 'approved', 'pricing_submitted'];
+  if (!OPEN.includes(r.status)) return false;
+  return (Date.now() - new Date(r.createdAt).getTime()) > 24 * 60 * 60 * 1000;
+}
+
+function _ageStr(r) {
+  const h = Math.floor((Date.now() - new Date(r.createdAt).getTime()) / 3600000);
+  const d = Math.floor(h / 24);
+  return d > 0 ? `${d}d ${h % 24}h` : `${h}h`;
+}
+
+function _relTime(isoStr) {
+  if (!isoStr) return '';
+  const m = Math.floor((Date.now() - new Date(isoStr).getTime()) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function _sortDelayedFirst(arr) {
+  return [...arr].sort((a, b) => {
+    const da = _isDelayed(a) ? 0 : 1;
+    const db = _isDelayed(b) ? 0 : 1;
+    if (da !== db) return da - db;
+    return b.createdAt.localeCompare(a.createdAt);
+  });
+}
+
+function _delayBadge(r) {
+  if (!_isDelayed(r)) return '';
+  return `<div style="font-size:11px;font-weight:700;color:#dc2626;background:#fef2f2;border-radius:99px;padding:1px 8px;display:inline-block;margin-bottom:6px">⏰ Delayed ${_ageStr(r)}</div>`;
+}
+
+function _callStatusBadge(r) {
+  if (!r.callStatus) return '';
+  const cfg = CS_CFG[r.callStatus] || { label: r.callStatus, color: '#6b7280', bg: '#f3f4f6' };
+  const meta = r.callStatusBy
+    ? `<span style="font-size:10.5px;color:var(--mute);margin-left:6px">By ${r.callStatusBy}${r.callStatusAt ? ' · ' + _relTime(r.callStatusAt) : ''}</span>`
+    : '';
+  return `<div style="margin-bottom:6px"><span style="font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>${meta}</div>`;
+}
+
+function _adminNotesBlock(r, isAdmin) {
+  const noteHtml = r.adminNotes
+    ? `<div style="background:#fdf3dc;border-left:3px solid #f59e0b;border-radius:4px;padding:7px 10px;font-size:12.5px;color:#92400e;margin-bottom:8px">📝 ${r.adminNotes}</div>`
+    : '';
+  if (isAdmin) {
+    return noteHtml + `<button class="btn btn-ghost btn-xs" onclick="openAdminNotesModal('${r.id}')" style="margin-bottom:8px;font-size:11px">📝 ${r.adminNotes ? 'Edit Note' : 'Add Note to Sales'}</button>`;
+  }
+  return noteHtml;
+}
+
+function _cwpBlock(r, isAdmin) {
+  if (isAdmin) {
+    const show = r.status === 'final_approved' || r.claimWithoutPayment;
+    if (!show) return '';
+    return `<label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;margin-bottom:8px;color:var(--mute)">
+      <input type="checkbox" ${r.claimWithoutPayment ? 'checked' : ''} onchange="toggleClaimWithoutPayment('${r.id}', this.checked)">
+      Allow claim without payment
+    </label>`;
+  }
+  if (r.claimWithoutPayment) {
+    return `<div style="background:#fff7ed;border:1px solid #f97316;border-radius:6px;padding:6px 10px;font-size:12px;color:#c2410c;font-weight:600;margin-bottom:8px">⚠ Claim Without Payment Authorized</div>`;
+  }
+  return '';
+}
+
+function _consultSummary(r) {
+  const parts = [];
+  if (r.surfaceType) parts.push(r.surfaceType === 'internal' ? '🏠 Internal' : '🏗 External');
+  if (r.texture) {
+    const tex = { concrete: '🧱 Concrete', wood: '🪵 Wood', gypsum_board: '📐 Gypsum Board' };
+    parts.push(tex[r.texture] || r.texture);
+  }
+  if (r.spaceType === 'room' && r.roomLength && r.roomWidth) {
+    parts.push(`📐 ${r.roomLength}×${r.roomWidth}m${r.roomHeight ? ` h${r.roomHeight}` : ''}`);
+  } else if (r.spaceType === 'apartment' && r.numRooms) {
+    parts.push(`🏢 ${r.numRooms} rooms${r.apartmentArea ? `, ${r.apartmentArea}m²` : ''}`);
+  }
+  return parts.join(' · ');
+}
+
+// ── MAIN RENDER ──
 export async function renderRequests(filter) {
   document.getElementById('sectionRequests').innerHTML = '<div class="empty" style="padding:40px">Loading requests…</div>';
   try {
@@ -35,29 +132,14 @@ export async function renderRequests(filter) {
   }
 }
 
-// ── Shared helpers ──
-function _consultSummary(r) {
-  const parts = [];
-  if (r.surfaceType) parts.push(r.surfaceType === 'internal' ? '🏠 Internal' : '🏗 External');
-  if (r.texture) {
-    const tex = { concrete: '🧱 Concrete', wood: '🪵 Wood', gypsum_board: '📐 Gypsum Board' };
-    parts.push(tex[r.texture] || r.texture);
-  }
-  if (r.spaceType === 'room' && r.roomLength && r.roomWidth) {
-    parts.push(`📐 ${r.roomLength}×${r.roomWidth}m${r.roomHeight ? ` h${r.roomHeight}` : ''}`);
-  } else if (r.spaceType === 'apartment' && r.numRooms) {
-    parts.push(`🏢 ${r.numRooms} rooms${r.apartmentArea ? `, ${r.apartmentArea}m²` : ''}`);
-  }
-  return parts.join(' · ');
-}
-
 // ── ADMIN VIEW ──
 async function _renderAdminRequests(filter) {
   const allReq = _reqsCache;
   let reqs = allReq;
   if (filter && filter !== 'all') reqs = reqs.filter(r => r.status === filter);
-  reqs = [...reqs].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  reqs = _sortDelayedFirst(reqs);
 
+  const delayed = allReq.filter(r => _isDelayed(r)).length;
   const counts = {
     all:               allReq.length,
     pending:           allReq.filter(r => r.status === 'pending').length,
@@ -67,6 +149,9 @@ async function _renderAdminRequests(filter) {
 
   document.getElementById('sectionRequests').innerHTML = `
   <div class="ph"><div class="ph-info"><h2>All Requests</h2><p>Review and approve incoming requests</p></div></div>
+  <div class="kpi-grid" style="margin-bottom:20px">
+    <div class="kpi kpi-red" style="padding:14px 18px"><span class="kpi-icon" style="font-size:18px">⏰</span><div class="kpi-label">Delayed</div><div class="kpi-val" style="font-size:20px;color:#dc2626">${delayed}</div><div class="kpi-sub">Open &gt; 24h</div></div>
+  </div>
   <div class="fbar">
     <button class="ftab ${!filter||filter==='all'?'active':''}" onclick="renderRequests('all')">All (${counts.all})</button>
     <button class="ftab ${filter==='pending'?'active':''}" onclick="renderRequests('pending')">Pending (${counts.pending})</button>
@@ -81,6 +166,7 @@ async function _renderAdminRequests(filter) {
 
 function _adminReqCard(r) {
   const isConsult = r.requestType === 'consultation';
+  const delayed   = _isDelayed(r);
 
   const rows = r.products.map(p =>
     `<div class="rcard-prod-row">
@@ -122,7 +208,7 @@ function _adminReqCard(r) {
   const consultBlock = isConsult ? (() => {
     const summary = _consultSummary(r);
     return `<div style="background:#eff6ff;border-radius:6px;padding:8px 10px;font-size:12px;color:#1d4ed8;margin-bottom:8px">
-      💬 <strong>Consultation</strong>${summary ? ` · ${summary}` : ''}
+      💬 <strong>Consultation</strong>${summary ? ' · ' + summary : ''}
       ${r.consultNotes ? `<div style="color:var(--mute);margin-top:3px">📝 ${r.consultNotes}</div>` : ''}
     </div>`;
   })() : '';
@@ -132,44 +218,65 @@ function _adminReqCard(r) {
       <div class="rcard-total"><span style="color:var(--mute);font-size:12.5px;font-weight:600">Total</span><span style="color:var(--gold-d)">${r.totalAmount > 0 ? fmtCur(r.totalAmount) : 'TBD'}</span></div>
     </div>` : '';
 
-  return `<div class="rcard">
+  const csBtn = `<button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px;margin-bottom:8px">📞 Update Contact Status</button>`;
+
+  return `<div class="rcard${delayed ? ' delayed-card' : ''}">
+    ${_delayBadge(r)}
     <div class="rcard-top"><div><div class="rcard-client">${r.clientName}</div><div class="rcard-ref">${r.ref} ${srcBadge}${consultBadge}</div></div>${statusBadge(r.status)}</div>
     <div class="rcard-meta"><div class="rcard-meta-row">📞 ${r.phone}</div><div class="rcard-meta-row">📍 ${r.address}</div><div class="rcard-meta-row">👤 ${r.salesName} · ${fmtDate(r.createdAt)}</div>${assignedInfo}</div>
+    ${_callStatusBadge(r)}
     ${consultBlock}${productsBlock}
-    ${r.notes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.notes}</div>` : ''}${rej}${act ? `<div class="rcard-actions">${act}</div>` : ''}
+    ${r.notes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.notes}</div>` : ''}
+    ${rej}
+    ${_adminNotesBlock(r, true)}
+    ${_cwpBlock(r, true)}
+    ${csBtn}
+    ${act ? `<div class="rcard-actions">${act}</div>` : ''}
   </div>`;
 }
 
 // ── SALES VIEW ──
 async function _renderSalesRequests() {
   const uid = App.user.id;
-  const myCreated   = _reqsCache.filter(r => r.createdBy === uid);
-  const forPricing  = _reqsCache.filter(r => r.assignedSalesId === uid && r.status === 'approved');
+  const myPricing    = _reqsCache.filter(r => r.assignedSalesId === uid && r.status === 'approved');
+  const myPricingIds = new Set(myPricing.map(r => r.id));
   const openConsults = _reqsCache.filter(r => r.requestType === 'consultation' && r.status === 'pending' && !r.assignedSalesId);
-  const sorted = arr => [...arr].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const openIds      = new Set(openConsults.map(r => r.id));
+  const myCreated    = _reqsCache.filter(r => r.createdBy === uid && !myPricingIds.has(r.id));
+  const others       = _reqsCache.filter(r =>
+    r.createdBy !== uid &&
+    !myPricingIds.has(r.id) &&
+    !openIds.has(r.id)
+  );
 
   document.getElementById('sectionRequests').innerHTML = `
-  <div class="ph"><div class="ph-info"><h2>My Requests</h2><p>Manage your submitted requests and assigned pricing tasks</p></div>
+  <div class="ph"><div class="ph-info"><h2>Requests</h2><p>Your pipeline and the full team view</p></div>
     <div class="ph-actions"><button class="btn btn-gold" onclick="openNewRequestModal()">＋ New Request</button></div></div>
 
   ${openConsults.length ? `
   <div style="margin-bottom:8px;font-size:11.5px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:.5px">Open Consultations (${openConsults.length})</div>
-  <div class="cards-grid" style="margin-bottom:28px">${sorted(openConsults).map(r => _consultationCard(r)).join('')}</div>` : ''}
+  <div class="cards-grid" style="margin-bottom:28px">${_sortDelayedFirst(openConsults).map(r => _consultationCard(r)).join('')}</div>` : ''}
 
-  ${forPricing.length ? `
-  <div style="margin-bottom:8px;font-size:11.5px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.5px">Assigned for Pricing (${forPricing.length})</div>
-  <div class="cards-grid" style="margin-bottom:28px">${sorted(forPricing).map(r => r.requestType === 'consultation' ? _consultPricingCard(r) : _pricingCard(r)).join('')}</div>` : ''}
+  ${myPricing.length ? `
+  <div style="margin-bottom:8px;font-size:11.5px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.5px">Assigned for Pricing (${myPricing.length})</div>
+  <div class="cards-grid" style="margin-bottom:28px">${_sortDelayedFirst(myPricing).map(r => r.requestType === 'consultation' ? _consultPricingCard(r) : _pricingCard(r)).join('')}</div>` : ''}
 
   <div style="margin-bottom:8px;font-size:11.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.5px">My Requests (${myCreated.length})</div>
-  <div class="cards-grid">${sorted(myCreated).length
-    ? sorted(myCreated).map(r => _salesReqCard(r)).join('')
+  <div class="cards-grid" style="margin-bottom:28px">${myCreated.length
+    ? _sortDelayedFirst(myCreated).map(r => _salesReqCard(r, true)).join('')
     : '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◌</div><h4>No requests yet</h4><p>Create your first request above</p></div>'
-  }</div>`;
+  }</div>
+
+  ${others.length ? `
+  <div style="margin-bottom:8px;font-size:11.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.5px">Team Requests (${others.length})</div>
+  <div class="cards-grid">${_sortDelayedFirst(others).map(r => _salesReqCard(r, false)).join('')}</div>` : ''}`;
 }
 
 function _consultationCard(r) {
   const summary = _consultSummary(r);
-  return `<div class="rcard" style="border-left:3px solid #2563eb">
+  const delayed = _isDelayed(r);
+  return `<div class="rcard${delayed ? ' delayed-card' : ''}" style="border-left:3px solid #2563eb">
+    ${_delayBadge(r)}
     <div class="rcard-top"><div>
       <div class="rcard-client">${r.clientName}</div>
       <div class="rcard-ref">${r.ref} <span style="font-size:10px;padding:1px 7px;border-radius:99px;background:#eff6ff;color:#2563eb;font-weight:700">Consultation</span></div>
@@ -179,15 +286,22 @@ function _consultationCard(r) {
       <div class="rcard-meta-row">📍 ${r.address}</div>
       <div class="rcard-meta-row">📅 ${fmtDate(r.createdAt)}</div>
     </div>
+    ${_callStatusBadge(r)}
     ${summary ? `<div style="font-size:12.5px;color:var(--mute);margin-bottom:8px">${summary}</div>` : ''}
     ${r.consultNotes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.consultNotes}</div>` : ''}
-    <div class="rcard-actions"><button class="btn btn-primary btn-sm" style="flex:1" onclick="claimConsultation('${r.id}')">🤝 Claim &amp; Handle</button></div>
+    ${_adminNotesBlock(r, false)}
+    <div class="rcard-actions">
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="claimConsultation('${r.id}')">🤝 Claim &amp; Handle</button>
+      <button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px">📞 Contact</button>
+    </div>
   </div>`;
 }
 
 function _consultPricingCard(r) {
   const summary = _consultSummary(r);
-  return `<div class="rcard" style="border-left:3px solid var(--amber)">
+  const delayed = _isDelayed(r);
+  return `<div class="rcard${delayed ? ' delayed-card' : ''}" style="border-left:3px solid var(--amber)">
+    ${_delayBadge(r)}
     <div class="rcard-top"><div>
       <div class="rcard-client">${r.clientName}</div>
       <div class="rcard-ref">${r.ref} <span style="font-size:10px;padding:1px 7px;border-radius:99px;background:#eff6ff;color:#2563eb;font-weight:700">Consultation</span></div>
@@ -196,42 +310,84 @@ function _consultPricingCard(r) {
       <div class="rcard-meta-row">📞 ${r.phone}</div>
       <div class="rcard-meta-row">📍 ${r.address}</div>
     </div>
+    ${_callStatusBadge(r)}
     ${summary ? `<div style="font-size:12.5px;color:var(--mute);margin-bottom:8px">${summary}</div>` : ''}
     ${r.consultNotes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.consultNotes}</div>` : ''}
-    <div class="rcard-actions"><button class="btn btn-gold btn-sm" style="flex:1" onclick="openConsultPricingModal('${r.id}')">✏ Recommend &amp; Price</button></div>
+    ${_adminNotesBlock(r, false)}
+    <div class="rcard-actions">
+      <button class="btn btn-gold btn-sm" style="flex:1" onclick="openConsultPricingModal('${r.id}')">✏ Recommend &amp; Price</button>
+      <button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px">📞 Contact</button>
+    </div>
   </div>`;
 }
 
-function _salesReqCard(r) {
+function _salesReqCard(r, isOwn) {
+  const delayed = _isDelayed(r);
+  const isConsult = r.requestType === 'consultation';
+  const consultBadge = isConsult ? `<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:#eff6ff;color:#2563eb;font-weight:700;margin-left:4px">Consultation</span>` : '';
+
   const rows = r.products.map(p =>
     `<div class="rcard-prod-row">
       <span>${p.name} <span style="color:var(--mute);font-size:11px">[${p.colorCode}]</span></span>
       <span>${p.qty} L${p.price > 0 ? ' × ' + fmtCur(p.price) : ''}</span>
     </div>`
   ).join('');
+
   const rej = r.status === 'rejected' && r.rejectionReason
     ? `<div style="background:var(--red-l);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--red);margin-bottom:8px">✕ ${r.rejectionReason}</div>`
     : '';
-  const isConsult = r.requestType === 'consultation';
-  const consultBadge = isConsult ? `<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:#eff6ff;color:#2563eb;font-weight:700;margin-left:4px">Consultation</span>` : '';
-  return `<div class="rcard">
-    <div class="rcard-top"><div><div class="rcard-client">${r.clientName}</div><div class="rcard-ref">${r.ref}${consultBadge}</div></div>${statusBadge(r.status)}</div>
-    <div class="rcard-meta"><div class="rcard-meta-row">📞 ${r.phone}</div><div class="rcard-meta-row">👤 ${r.salesName} · ${fmtDate(r.createdAt)}</div></div>
+
+  const viewOnlyStyle = !isOwn ? 'opacity:0.78;background:var(--border-l)' : '';
+
+  // For view-only other-salesman requests: show deliver/payment if they have an order
+  let extraAct = '';
+  if (!isOwn) {
+    const orderId = r.order?.id;
+    if (orderId) {
+      extraAct = `<div class="rcard-actions" style="margin-top:8px">
+        <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="markDelivered('${orderId}')">✓ Mark Delivered</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="openAddPayment('${orderId}')">＋ Payment</button>
+      </div>`;
+    }
+  }
+
+  return `<div class="rcard${delayed ? ' delayed-card' : ''}" style="${viewOnlyStyle}">
+    ${_delayBadge(r)}
+    <div class="rcard-top"><div>
+      <div class="rcard-client">${r.clientName}${!isOwn ? ` <span style="font-size:10px;color:var(--mute)">· ${r.salesName}</span>` : ''}</div>
+      <div class="rcard-ref">${r.ref}${consultBadge}</div>
+    </div>${statusBadge(r.status)}</div>
+    <div class="rcard-meta">
+      <div class="rcard-meta-row">📞 ${r.phone}</div>
+      <div class="rcard-meta-row">👤 ${r.salesName} · ${fmtDate(r.createdAt)}</div>
+    </div>
+    ${_callStatusBadge(r)}
     ${rows.length ? `<div class="rcard-products">${rows}<div class="rcard-total"><span style="color:var(--mute);font-size:12.5px;font-weight:600">Total</span><span style="color:var(--gold-d)">${r.totalAmount > 0 ? fmtCur(r.totalAmount) : 'TBD'}</span></div></div>` : ''}
     ${rej}
+    ${_adminNotesBlock(r, false)}
+    ${_cwpBlock(r, false)}
+    ${isOwn ? `<button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px;margin-top:4px">📞 Update Contact Status</button>` : ''}
+    ${extraAct}
   </div>`;
 }
 
 function _pricingCard(r) {
+  const delayed = _isDelayed(r);
   const rows = r.products.map(p =>
     `<div class="rcard-prod-row"><span>${p.name} <span style="color:var(--mute);font-size:11px">[${p.colorCode}]</span></span><span>${p.qty} L</span></div>`
   ).join('');
-  return `<div class="rcard" style="border-left:3px solid var(--amber)">
+  return `<div class="rcard${delayed ? ' delayed-card' : ''}" style="border-left:3px solid var(--amber)">
+    ${_delayBadge(r)}
     <div class="rcard-top"><div><div class="rcard-client">${r.clientName}</div><div class="rcard-ref">${r.ref}</div></div>${statusBadge(r.status)}</div>
     <div class="rcard-meta"><div class="rcard-meta-row">📞 ${r.phone}</div><div class="rcard-meta-row">📍 ${r.address}</div></div>
+    ${_callStatusBadge(r)}
     <div class="rcard-products">${rows}</div>
     ${r.notes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.notes}</div>` : ''}
-    <div class="rcard-actions"><button class="btn btn-gold btn-sm" style="flex:1" onclick="openPricingModal('${r.id}')">✏ Add Pricing</button></div>
+    ${_adminNotesBlock(r, false)}
+    <div class="rcard-actions">
+      <button class="btn btn-gold btn-sm" style="flex:1" onclick="openPricingModal('${r.id}')">✏ Add Pricing</button>
+      <button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px">📞 Contact</button>
+    </div>
   </div>`;
 }
 
@@ -248,6 +404,7 @@ function _renderClientRequests() {
     return `<div class="rcard">
       <div class="rcard-top"><div><div class="rcard-client">${r.clientName}</div><div class="rcard-ref">${r.ref}</div></div>${statusBadge(r.status)}</div>
       <div class="rcard-meta"><div class="rcard-meta-row">📅 ${fmtDate(r.createdAt)}</div><div class="rcard-meta-row" style="font-weight:600">${label}</div></div>
+      ${_cwpBlock(r, false)}
       ${rej}
     </div>`;
   }).join('')}`;
@@ -343,75 +500,92 @@ export async function doReject(reqId) {
   }
 }
 
-// ── STANDARD PRICING MODAL (sales) ──
-export function openPricingModal(reqId) {
+// ── CALL STATUS MODAL ──
+export function openCallStatusModal(reqId) {
   const r = _reqsCache.find(req => req.id === reqId);
-  if (!r) { showToast('Request data not found — please refresh', 'toast-red'); return; }
-
-  const rows = r.products.map(p => `
-    <tr class="pricing-row" data-pid="${p.id}" data-qty="${p.qty}">
-      <td>${p.name} <span style="color:var(--mute);font-size:11px">[${p.colorCode}]</span></td>
-      <td style="text-align:center">${p.qty} L</td>
-      <td><input class="fi fi-sm" type="number" id="pp_${p.id}" placeholder="0.00" oninput="calcPricingTotal()" style="width:90px;text-align:right"></td>
-      <td id="pt_${p.id}" style="text-align:right;color:var(--gold-d);font-weight:600">—</td>
-    </tr>`).join('');
-
-  openModal(`<div class="mh"><div class="mh-left"><h3>Add Pricing</h3><span class="mh-recipe">${r.ref}</span></div><button class="mx" onclick="closeModal()">✕</button></div>
+  const cur = r?.callStatus || '';
+  openModal(`<div class="mh"><div class="mh-left"><h3>Update Contact Status</h3></div><button class="mx" onclick="closeModal()">✕</button></div>
   <div class="mc">
-    <p style="color:var(--mute);font-size:12.5px;margin-bottom:12px">Client: <strong>${r.clientName}</strong> · ${r.phone}</p>
-    <table style="width:100%;border-collapse:collapse">
-      <thead><tr style="font-size:11px;color:var(--mute);text-transform:uppercase">
-        <th style="text-align:left;padding:6px 0">Product</th>
-        <th style="text-align:center">Qty</th>
-        <th style="text-align:center">Price/L</th>
-        <th style="text-align:right">Total</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:14px;padding-top:10px;border-top:2px solid var(--gold)">
-      <span style="font-size:12px;color:var(--mute);font-weight:600;text-transform:uppercase">Order Total</span>
-      <span id="pricingTotal" style="font-size:16px;font-weight:800;color:var(--gold-d)">EGP 0</span>
+    <div class="fg"><label class="fl req">Contact Status</label>
+      <select class="fi" id="csSelect">
+        <option value="">— Select status —</option>
+        <option value="callback"    ${cur==='callback'   ?'selected':''}>📞 Callback</option>
+        <option value="following"   ${cur==='following'  ?'selected':''}>👀 Following Up</option>
+        <option value="no_answer"   ${cur==='no_answer'  ?'selected':''}>📵 No Answer</option>
+        <option value="low_budget"  ${cur==='low_budget' ?'selected':''}>💸 Low Budget</option>
+        <option value="lead"        ${cur==='lead'       ?'selected':''}>🆕 New Lead</option>
+        <option value="out_of_zone" ${cur==='out_of_zone'?'selected':''}>🚫 Out of Zone</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Note <span style="font-size:11px;color:var(--mute)">(optional)</span></label>
+      <input class="fi" id="csNote" placeholder="Add a note…" value="${r?.callStatusNote || ''}">
     </div>
   </div>
   <div class="mf"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    <button class="btn btn-primary" onclick="submitPricing('${reqId}')">Submit Pricing →</button></div>`, 'modal-md');
+    <button class="btn btn-primary" onclick="_saveCallStatus('${reqId}')">Save Status</button></div>`, 'modal-sm');
 }
 
-export function calcPricingTotal() {
-  let t = 0;
-  document.querySelectorAll('.pricing-row').forEach(row => {
-    const pid   = row.dataset.pid;
-    const qty   = parseFloat(row.dataset.qty) || 0;
-    const price = parseFloat(document.getElementById('pp_' + pid)?.value) || 0;
-    const lineTotal = qty * price;
-    t += lineTotal;
-    const ptEl = document.getElementById('pt_' + pid);
-    if (ptEl) ptEl.textContent = fmtCur(lineTotal);
-  });
-  const totEl = document.getElementById('pricingTotal');
-  if (totEl) totEl.textContent = fmtCur(t);
-}
-
-export async function submitPricing(reqId) {
-  const r = _reqsCache.find(req => req.id === reqId);
-  if (!r) return;
-
-  const products = r.products.map(p => ({
-    id:    p.id,
-    qty:   p.qty,
-    price: parseFloat(document.getElementById('pp_' + p.id)?.value) || 0,
-  }));
-
-  if (products.some(p => p.price <= 0)) {
-    alert('Please enter a price greater than 0 for all products.');
-    return;
-  }
-
+window._saveCallStatus = async function (reqId) {
+  const callStatus = document.getElementById('csSelect').value;
+  if (!callStatus) { alert('Please select a status.'); return; }
+  const callStatusNote = document.getElementById('csNote').value.trim();
   try {
-    await api.assignPricingRequest(reqId, products);
+    const updated = await api.updateCallStatus(reqId, { callStatus, callStatusNote });
+    _reqsCache = _reqsCache.map(r => r.id === reqId ? updated : r);
     closeModal();
-    showToast('Pricing submitted for admin review', 'toast-gold');
-    await renderRequests();
+    showToast('Contact status updated', 'toast-gold');
+    if (App.section === 'requests') await renderRequests(App.user.role === 'admin' ? undefined : undefined);
+    else if (App.section === 'dashboard') await window.renderDashboard();
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'toast-red');
+  }
+};
+
+// ── ADMIN NOTES MODAL ──
+export function openAdminNotesModal(reqId) {
+  const r = _reqsCache.find(req => req.id === reqId);
+  openModal(`<div class="mh"><div class="mh-left"><h3>Note to Sales Team</h3></div><button class="mx" onclick="closeModal()">✕</button></div>
+  <div class="mc">
+    <p style="color:var(--mute);font-size:12.5px;margin-bottom:12px">Sales reps assigned to this request will see this note.</p>
+    <div class="fg"><label class="fl">Notes for sales team:</label>
+      <textarea class="fi" id="anText" rows="4" style="resize:none" placeholder="e.g. Client prefers morning calls, budget confirmed…">${r?.adminNotes || ''}</textarea>
+    </div>
+  </div>
+  <div class="mf"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="_saveAdminNotes('${reqId}')">Save Note</button></div>`, 'modal-sm');
+}
+
+window._saveAdminNotes = async function (reqId) {
+  const adminNotes = document.getElementById('anText').value.trim();
+  try {
+    const updated = await api.updateAdminNotes(reqId, { adminNotes });
+    _reqsCache = _reqsCache.map(r => r.id === reqId ? updated : r);
+    closeModal();
+    showToast('Note saved', 'toast-gold');
+    if (App.section === 'requests') await renderRequests();
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'toast-red');
+  }
+};
+
+// ── CLAIM WITHOUT PAYMENT TOGGLE ──
+export async function toggleClaimWithoutPayment(reqId, value) {
+  try {
+    const updated = await api.setClaimWithoutPayment(reqId, value);
+    _reqsCache = _reqsCache.map(r => r.id === reqId ? updated : r);
+    showToast(value ? '⚠ Claim without payment authorized' : 'Claim without payment removed', value ? 'toast-gold' : 'toast-red');
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'toast-red');
+    if (App.section === 'requests') await renderRequests();
+  }
+}
+
+// ── MARK DELIVERED (for sales acting on other's orders) ──
+export async function markDelivered(orderId) {
+  try {
+    await api.updateOrderStatus(orderId, { status: 'delivered' });
+    showToast('Order marked as delivered', 'toast-gold');
+    if (App.section === 'requests') await renderRequests();
   } catch (err) {
     showToast('Failed: ' + err.message, 'toast-red');
   }
@@ -555,6 +729,80 @@ export async function submitConsultPricing(reqId) {
     await api.assignPricingRequest(reqId, products);
     closeModal();
     showToast('Consultation pricing submitted for admin review', 'toast-gold');
+    await renderRequests();
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'toast-red');
+  }
+}
+
+// ── STANDARD PRICING MODAL (sales) ──
+export function openPricingModal(reqId) {
+  const r = _reqsCache.find(req => req.id === reqId);
+  if (!r) { showToast('Request data not found — please refresh', 'toast-red'); return; }
+
+  const rows = r.products.map(p => `
+    <tr class="pricing-row" data-pid="${p.id}" data-qty="${p.qty}">
+      <td>${p.name} <span style="color:var(--mute);font-size:11px">[${p.colorCode}]</span></td>
+      <td style="text-align:center">${p.qty} L</td>
+      <td><input class="fi fi-sm" type="number" id="pp_${p.id}" placeholder="0.00" oninput="calcPricingTotal()" style="width:90px;text-align:right"></td>
+      <td id="pt_${p.id}" style="text-align:right;color:var(--gold-d);font-weight:600">—</td>
+    </tr>`).join('');
+
+  openModal(`<div class="mh"><div class="mh-left"><h3>Add Pricing</h3><span class="mh-recipe">${r.ref}</span></div><button class="mx" onclick="closeModal()">✕</button></div>
+  <div class="mc">
+    <p style="color:var(--mute);font-size:12.5px;margin-bottom:12px">Client: <strong>${r.clientName}</strong> · ${r.phone}</p>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr style="font-size:11px;color:var(--mute);text-transform:uppercase">
+        <th style="text-align:left;padding:6px 0">Product</th>
+        <th style="text-align:center">Qty</th>
+        <th style="text-align:center">Price/L</th>
+        <th style="text-align:right">Total</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:14px;padding-top:10px;border-top:2px solid var(--gold)">
+      <span style="font-size:12px;color:var(--mute);font-weight:600;text-transform:uppercase">Order Total</span>
+      <span id="pricingTotal" style="font-size:16px;font-weight:800;color:var(--gold-d)">EGP 0</span>
+    </div>
+  </div>
+  <div class="mf"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="submitPricing('${reqId}')">Submit Pricing →</button></div>`, 'modal-md');
+}
+
+export function calcPricingTotal() {
+  let t = 0;
+  document.querySelectorAll('.pricing-row').forEach(row => {
+    const pid   = row.dataset.pid;
+    const qty   = parseFloat(row.dataset.qty) || 0;
+    const price = parseFloat(document.getElementById('pp_' + pid)?.value) || 0;
+    const lineTotal = qty * price;
+    t += lineTotal;
+    const ptEl = document.getElementById('pt_' + pid);
+    if (ptEl) ptEl.textContent = fmtCur(lineTotal);
+  });
+  const totEl = document.getElementById('pricingTotal');
+  if (totEl) totEl.textContent = fmtCur(t);
+}
+
+export async function submitPricing(reqId) {
+  const r = _reqsCache.find(req => req.id === reqId);
+  if (!r) return;
+
+  const products = r.products.map(p => ({
+    id:    p.id,
+    qty:   p.qty,
+    price: parseFloat(document.getElementById('pp_' + p.id)?.value) || 0,
+  }));
+
+  if (products.some(p => p.price <= 0)) {
+    alert('Please enter a price greater than 0 for all products.');
+    return;
+  }
+
+  try {
+    await api.assignPricingRequest(reqId, products);
+    closeModal();
+    showToast('Pricing submitted for admin review', 'toast-gold');
     await renderRequests();
   } catch (err) {
     showToast('Failed: ' + err.message, 'toast-red');

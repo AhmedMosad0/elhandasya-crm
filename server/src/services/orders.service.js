@@ -16,11 +16,8 @@ function calcPaymentStatus(paidAmount, totalAmount) {
 
 export const ordersService = {
   list(user) {
-    const where = {};
-    if (user.role === 'sales') where.salesId = user.id;
-    else if (user.role === 'mixer') where.mixerId = user.id;
-    else if (user.role === 'delivery') where.deliveryId = user.id;
-    else if (user.role === 'client') where.clientId = user.clientId;
+    // Sales and admin see all orders; client sees own only
+    const where = user.role === 'client' ? { clientId: user.clientId } : {};
     return ordersRepository.findAll(where);
   },
 
@@ -58,8 +55,8 @@ export const ordersService = {
   },
 
   async assign(id, { role, userId }, actorName) {
-    if (!['mixer', 'delivery', 'sales'].includes(role)) {
-      throw Object.assign(new Error('role must be mixer, delivery, or sales'), { status: 400 });
+    if (role !== 'sales') {
+      throw Object.assign(new Error('role must be sales'), { status: 400 });
     }
     const o = await ordersRepository.findById(id);
     if (!o) throw Object.assign(new Error('Order not found'), { status: 404 });
@@ -67,20 +64,8 @@ export const ordersService = {
     const assignee = await usersRepository.findById(userId);
     if (!assignee) throw Object.assign(new Error('User not found'), { status: 404 });
 
-    const data = {};
-    let logText = '';
-    if (role === 'mixer') {
-      data.mixerId = userId; data.mixerName = assignee.name;
-      logText = `Assigned ${assignee.name} as mixer`;
-    } else if (role === 'delivery') {
-      data.deliveryId = userId; data.deliveryName = assignee.name;
-      logText = `Assigned ${assignee.name} for delivery`;
-    } else {
-      data.salesId = userId; data.salesName = assignee.name;
-      logText = `Assigned ${assignee.name} as sales rep`;
-    }
-
-    await ordersRepository.addActivity(id, { text: logText, time: nowStr(), userName: actorName });
+    const data = { salesId: userId, salesName: assignee.name };
+    await ordersRepository.addActivity(id, { text: `Assigned ${assignee.name} as sales rep`, time: nowStr(), userName: actorName });
     return ordersRepository.update(id, data);
   },
 

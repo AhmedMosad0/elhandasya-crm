@@ -12,6 +12,7 @@ import {
   promptApproveWithSales, doApproveWithSales, doFinalApprove,
   openPricingModal, calcPricingTotal, submitPricing,
   claimConsultation, openConsultPricingModal, submitConsultPricing,
+  openCallStatusModal, openAdminNotesModal, toggleClaimWithoutPayment, markDelivered,
 } from './views/requests/requests.js';
 import {
   renderOrders, openOrderModal, togDel, assignUser, updateOrderStatus,
@@ -42,6 +43,7 @@ Object.assign(window, {
   promptApproveWithSales, doApproveWithSales, doFinalApprove,
   openPricingModal, calcPricingTotal, submitPricing,
   claimConsultation, openConsultPricingModal, submitConsultPricing,
+  openCallStatusModal, openAdminNotesModal, toggleClaimWithoutPayment, markDelivered,
   renderOrders, openOrderModal, togDel, assignUser, updateOrderStatus,
   updatePayStatus, openAddPayment, savePayment, printReceipt,
   renderClients, openClientModal, openAddClient, saveNewClient,

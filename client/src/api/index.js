@@ -64,6 +64,9 @@ export async function rejectRequest(id, rejectionReason)     { return _req('PATC
 export async function assignPricingRequest(id, products)     { return _req('PATCH', '/requests/' + id + '/assign-pricing', { products }); }
 export async function finalApproveRequest(id)                { return _req('PATCH', '/requests/' + id + '/final-approve'); }
 export async function claimRequest(id)                       { return _req('PATCH', '/requests/' + id + '/claim'); }
+export async function updateCallStatus(id, data)             { return _req('PATCH', '/requests/' + id + '/call-status', data); }
+export async function updateAdminNotes(id, data)             { return _req('PATCH', '/requests/' + id + '/admin-notes', data); }
+export async function setClaimWithoutPayment(id, value)      { return _req('PATCH', '/requests/' + id + '/claim-without-payment', { claimWithoutPayment: value }); }
 
 // ── Products ──
 async function _reqMP(method, path, formData) {
