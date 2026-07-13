@@ -11,6 +11,7 @@ import {
   addPline, removePline, calcTotal, submitNewRequest, fillClient,
   promptApproveWithSales, doApproveWithSales, doFinalApprove,
   openPricingModal, calcPricingTotal, submitPricing,
+  claimConsultation, openConsultPricingModal, submitConsultPricing,
 } from './views/requests/requests.js';
 import {
   renderOrders, openOrderModal, togDel, assignUser, updateOrderStatus,
@@ -21,7 +22,7 @@ import { renderReports, genReport } from './views/reports/reports.js';
 import { renderMyWork, markMixed } from './views/mywork/mywork.js';
 import { renderClientPortal } from './views/client-portal/client-portal.js';
 import { renderClientOrders, openClientOrderDetail } from './views/client-orders/client-orders.js';
-import { renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder } from './views/client-neworder/client-neworder.js';
+import { renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder, submitConsultation } from './views/client-neworder/client-neworder.js';
 import { renderClientAccount } from './views/client-account/client-account.js';
 import { renderUsers, approveUserById, rejectUserById } from './views/users/users.js';
 import { renderProducts, openProductForm, saveProductForm } from './views/products/products.js';
@@ -40,6 +41,7 @@ Object.assign(window, {
   addPline, removePline, calcTotal, submitNewRequest, fillClient,
   promptApproveWithSales, doApproveWithSales, doFinalApprove,
   openPricingModal, calcPricingTotal, submitPricing,
+  claimConsultation, openConsultPricingModal, submitConsultPricing,
   renderOrders, openOrderModal, togDel, assignUser, updateOrderStatus,
   updatePayStatus, openAddPayment, savePayment, printReceipt,
   renderClients, openClientModal, openAddClient, saveNewClient,
@@ -47,7 +49,7 @@ Object.assign(window, {
   renderMyWork, markMixed,
   renderClientPortal,
   renderClientOrders, openClientOrderDetail,
-  renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder,
+  renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder, submitConsultation,
   renderClientAccount,
   _renderNav: renderNav,
   _updateNotifDot: updateNotifDot,

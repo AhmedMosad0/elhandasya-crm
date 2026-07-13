@@ -14,5 +14,15 @@ export const requestsRepository = {
 
   updateProduct: (id, data) => prisma.requestProduct.update({ where: { id }, data }),
 
+  deleteProducts: (requestId) => prisma.requestProduct.deleteMany({ where: { requestId } }),
+
+  createProducts: (requestId, products) => prisma.requestProduct.createMany({
+    data: products.map(p => ({
+      requestId,
+      name: p.name, colorCode: p.colorCode || '', colorName: p.colorName || '',
+      qty: p.qty, unit: 'L', price: p.price ?? 0, total: p.qty * (p.price ?? 0),
+    })),
+  }),
+
   count: () => prisma.request.count(),
 };

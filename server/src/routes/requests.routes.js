@@ -10,3 +10,4 @@ requestsRouter.patch('/:id/approve', requireRole('admin'), requestsController.ap
 requestsRouter.patch('/:id/reject', requireRole('admin'), requestsController.reject);
 requestsRouter.patch('/:id/assign-pricing', requireRole('sales', 'admin'), requestsController.assignPricing);
 requestsRouter.patch('/:id/final-approve', requireRole('admin'), requestsController.finalApprove);
+requestsRouter.patch('/:id/claim', requireRole('sales', 'admin'), requestsController.claim);

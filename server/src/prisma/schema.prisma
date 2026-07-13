@@ -49,6 +49,7 @@ model Request {
   id                String   @id @default(cuid())
   ref               String   @unique
   source            String   @default("sales")
+  requestType       String   @default("standard")
   clientId          String
   clientName        String
   phone             String
@@ -63,6 +64,17 @@ model Request {
   assignedSalesId   String?
   assignedSalesName String?
   createdAt         DateTime @default(now())
+
+  // Consultation-specific fields (all optional)
+  surfaceType   String?
+  texture       String?
+  spaceType     String?
+  roomLength    Float?
+  roomWidth     Float?
+  roomHeight    Float?
+  numRooms      Int?
+  apartmentArea Float?
+  consultNotes  String?
 
   client   Client           @relation(fields: [clientId], references: [id])
   creator  User             @relation(fields: [createdBy], references: [id])

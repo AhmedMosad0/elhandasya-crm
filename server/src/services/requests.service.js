@@ -41,6 +41,8 @@ export const requestsService = {
       where = { OR: [
         { createdBy: user.id },
         { assignedSalesId: user.id, status: 'approved' },
+        // Unclaimed consultations visible to all salesmen
+        { requestType: 'consultation', status: 'pending', assignedSalesId: null },
       ]};
     } else if (user.role === 'client') {
       where = { clientId: user.clientId };
@@ -54,25 +56,69 @@ export const requestsService = {
     return r;
   },
 
-  async create({ clientId, clientName, phone, email, address, products, notes, createdBy, salesName, source }) {
-    if (!clientId || !products?.length) {
+  async create({
+    clientId, clientName, phone, email, address, products, notes, createdBy, salesName, source,
+    requestType, surfaceType, texture, spaceType,
+    roomLength, roomWidth, roomHeight, numRooms, apartmentArea, consultNotes,
+  }) {
+    if (!clientId) {
+      throw Object.assign(new Error('clientId is required'), { status: 400 });
+    }
+    const isConsultation = requestType === 'consultation';
+    if (!isConsultation && !products?.length) {
       throw Object.assign(new Error('clientId and at least one product are required'), { status: 400 });
     }
+
     const count = await requestsRepository.count();
     const ref = `REQ-${String(count + 1).padStart(3, '0')}`;
-    const totalAmount = products.reduce((a, p) => a + (p.total ?? p.qty * p.price), 0);
+    const totalAmount = isConsultation
+      ? 0
+      : products.reduce((a, p) => a + (p.total ?? p.qty * p.price), 0);
+
+    const consultFields = isConsultation ? {
+      surfaceType: surfaceType || null,
+      texture: texture || null,
+      spaceType: spaceType || null,
+      roomLength: roomLength || null,
+      roomWidth: roomWidth || null,
+      roomHeight: roomHeight || null,
+      numRooms: numRooms || null,
+      apartmentArea: apartmentArea || null,
+      consultNotes: consultNotes || null,
+    } : {};
 
     return requestsRepository.create({
       ref, source: source || 'sales',
+      requestType: requestType || 'standard',
       clientId, clientName, phone, email: email || null, address,
       totalAmount, notes: notes || null, salesName, createdBy,
+      ...consultFields,
       products: {
-        create: products.map(p => ({
+        create: (products || []).map(p => ({
           name: p.name, colorCode: p.colorCode || '', colorName: p.colorName || '',
           qty: p.qty, unit: 'L', price: p.price ?? 0,
           total: p.total ?? p.qty * (p.price ?? 0),
         })),
       },
+    });
+  },
+
+  async claim(id, user) {
+    const req = await requestsRepository.findById(id);
+    if (!req) throw Object.assign(new Error('Request not found'), { status: 404 });
+    if (req.requestType !== 'consultation') {
+      throw Object.assign(new Error('Only consultation requests can be claimed'), { status: 400 });
+    }
+    if (req.status !== 'pending') {
+      throw Object.assign(new Error('Only pending requests can be claimed'), { status: 400 });
+    }
+    if (req.assignedSalesId) {
+      throw Object.assign(new Error('This request has already been claimed by another salesman'), { status: 409 });
+    }
+    return requestsRepository.update(id, {
+      status: 'approved',
+      assignedSalesId: user.id,
+      assignedSalesName: user.name,
     });
   },
 
@@ -84,13 +130,11 @@ export const requestsService = {
     }
 
     if (req.source === 'sales') {
-      // Sales flow: approve immediately and create order
       if (req.order) throw Object.assign(new Error('An order already exists for this request'), { status: 409 });
       await requestsRepository.update(id, { status: 'final_approved' });
       return _createOrderFromRequest(req, 'sales');
     }
 
-    // Client flow: assign a salesperson, hold for pricing
     if (!assignedSalesId) {
       throw Object.assign(new Error('assignedSalesId is required for client requests'), { status: 400 });
     }
@@ -114,10 +158,18 @@ export const requestsService = {
       throw Object.assign(new Error('You are not assigned to price this request'), { status: 403 });
     }
 
+    if (req.requestType === 'consultation') {
+      // Consultation: salesman creates all products from scratch
+      const totalAmount = products.reduce((a, p) => a + (p.qty * p.price), 0);
+      await requestsRepository.deleteProducts(id);
+      await requestsRepository.createProducts(id, products);
+      return requestsRepository.update(id, { status: 'pricing_submitted', totalAmount });
+    }
+
+    // Standard: update existing product prices
     for (const { id: prodId, price, qty } of products) {
       await requestsRepository.updateProduct(prodId, { price: price ?? 0, total: (qty ?? 0) * (price ?? 0) });
     }
-
     const updated = await requestsRepository.findById(id);
     const newTotal = updated.products.reduce((a, p) => a + p.total, 0);
     return requestsRepository.update(id, { status: 'pricing_submitted', totalAmount: newTotal });

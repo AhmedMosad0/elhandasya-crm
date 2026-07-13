@@ -38,4 +38,8 @@ export const requestsController = {
   finalApprove: async (req, res, next) => {
     try { res.json(await requestsService.finalApprove(req.params.id)); } catch (err) { next(err); }
   },
+
+  claim: async (req, res, next) => {
+    try { res.json(await requestsService.claim(req.params.id, req.user)); } catch (err) { next(err); }
+  },
 };

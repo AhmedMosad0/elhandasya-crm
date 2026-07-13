@@ -63,6 +63,7 @@ export async function approveRequest(id, body)               { return _req('PATC
 export async function rejectRequest(id, rejectionReason)     { return _req('PATCH', '/requests/' + id + '/reject', { rejectionReason }); }
 export async function assignPricingRequest(id, products)     { return _req('PATCH', '/requests/' + id + '/assign-pricing', { products }); }
 export async function finalApproveRequest(id)                { return _req('PATCH', '/requests/' + id + '/final-approve'); }
+export async function claimRequest(id)                       { return _req('PATCH', '/requests/' + id + '/claim'); }
 
 // ── Products ──
 async function _reqMP(method, path, formData) {
