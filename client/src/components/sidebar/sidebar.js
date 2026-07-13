@@ -2,7 +2,7 @@ import { App } from '../../state/store.js';
 import * as api from '../../api/index.js';
 
 const NAV = {
-  admin:    [{ icon:'◈', label:'Dashboard', key:'dashboard' }, { icon:'◌', label:'Requests', key:'requests', badge:true }, { icon:'▣', label:'Orders', key:'orders' }, { icon:'◉', label:'Clients', key:'clients' }, { icon:'◎', label:'Users', key:'users', usersBadge:true }, { icon:'▦', label:'Reports', key:'reports' }],
+  admin:    [{ icon:'◈', label:'Dashboard', key:'dashboard' }, { icon:'◌', label:'Requests', key:'requests', badge:true }, { icon:'▣', label:'Orders', key:'orders' }, { icon:'◉', label:'Clients', key:'clients' }, { icon:'◫', label:'Products', key:'products' }, { icon:'◎', label:'Users', key:'users', usersBadge:true }, { icon:'▦', label:'Reports', key:'reports' }],
   sales:    [{ icon:'◌', label:'My Requests',    key:'requests' }, { icon:'◉', label:'Clients', key:'clients' }],
   mixer:    [{ icon:'●', label:'My Work Queue',  key:'mywork' }],
   delivery: [{ icon:'▷', label:'My Deliveries',  key:'mywork' }, { icon:'▣', label:'All Orders', key:'orders' }],

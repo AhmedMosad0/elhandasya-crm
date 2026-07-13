@@ -3,6 +3,7 @@ import * as api from '../../api/index.js';
 import { fmtDate, fmtCur, statusBadge } from '../../utils/index.js';
 import { openModal, closeModal } from '../../components/modal/modal.js';
 import { showToast } from '../../components/toast/toast.js';
+import { openProductPicker } from '../../components/ProductPicker/product-picker.js';
 
 let _plc = 1;
 let _cid = null;
@@ -365,7 +366,7 @@ export async function openNewRequestModal() {
       <div class="fg"><label class="fl">Email</label><input class="fi" id="nr_email" type="email"></div>
     </div>
     <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="nr_notes" rows="2" style="resize:none" placeholder="Special instructions…"></textarea></div>
-    <div class="fsec">Products <button class="btn btn-ghost btn-xs" onclick="addPline()" style="margin-left:8px;vertical-align:middle">＋ Add</button></div>
+    <div class="fsec">Products <button class="btn btn-ghost btn-xs" onclick="addPline()" style="margin-left:8px;vertical-align:middle">＋ Add</button><button class="btn btn-ghost btn-xs" onclick="_openPickerForRequest()" style="margin-left:6px;vertical-align:middle">◫ Catalog</button></div>
     <div class="pline-wrap" id="plines">
       <div class="pline" id="pl_0">
         <input class="fi fi-sm" placeholder="Product name" id="pn_0" oninput="calcTotal()">
@@ -417,6 +418,30 @@ export function calcTotal() {
   });
   const e = document.getElementById('reqTotal'); if (e) e.textContent = fmtCur(t); return t;
 }
+
+function _openPickerForRequest() {
+  openProductPicker(({ name, colorCode, colorName, qty, price }) => {
+    // Fill first empty pline, or create a new one
+    let targetIdx = null;
+    for (const pl of document.querySelectorAll('#plines .pline')) {
+      const i = pl.id.replace('pl_', '');
+      if (!(document.getElementById('pn_' + i)?.value || '').trim()) { targetIdx = i; break; }
+    }
+    if (targetIdx === null) {
+      targetIdx = _plc++;
+      const d = document.createElement('div'); d.className = 'pline'; d.id = 'pl_' + targetIdx;
+      d.innerHTML = `<input class="fi fi-sm" placeholder="Product name" id="pn_${targetIdx}" oninput="calcTotal()"><input class="fi fi-sm" placeholder="Color Code" id="pc_${targetIdx}"><input class="fi fi-sm" placeholder="Color Name" id="pcn_${targetIdx}"><div style="display:flex;align-items:center;gap:6px"><input class="fi fi-sm" type="number" placeholder="Qty" id="pq_${targetIdx}" oninput="calcTotal()" style="flex:1"><span style="font-size:12px;font-weight:600;color:var(--mute)">L</span></div><input class="fi fi-sm" type="number" placeholder="Price/L" id="pp_${targetIdx}" oninput="calcTotal()"><button class="pline-rm" onclick="removePline(${targetIdx})">✕</button>`;
+      document.getElementById('plines').appendChild(d);
+    }
+    document.getElementById('pn_'  + targetIdx).value = name;
+    if (colorCode) document.getElementById('pc_' + targetIdx).value = colorCode;
+    if (colorName) document.getElementById('pcn_'+ targetIdx).value = colorName;
+    document.getElementById('pq_'  + targetIdx).value = qty;
+    document.getElementById('pp_'  + targetIdx).value = price;
+    calcTotal();
+  });
+}
+window._openPickerForRequest = _openPickerForRequest;
 
 export async function submitNewRequest() {
   const clientName = document.getElementById('nr_client').value.trim();

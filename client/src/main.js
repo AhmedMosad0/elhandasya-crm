@@ -24,12 +24,16 @@ import { renderClientOrders, openClientOrderDetail } from './views/client-orders
 import { renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder } from './views/client-neworder/client-neworder.js';
 import { renderClientAccount } from './views/client-account/client-account.js';
 import { renderUsers, approveUserById, rejectUserById } from './views/users/users.js';
+import { renderProducts, openProductForm, saveProductForm } from './views/products/products.js';
+import { openProductPicker, closeProductPicker } from './components/ProductPicker/product-picker.js';
 
 // Wire functions referenced from inline onclick/oninput attributes onto window.
 Object.assign(window, {
   doLogin, logout, togglePortal, navigate, handleSearch,
   doSignup, showSignup, showLogin, selectSignupRole,
   renderUsers, approveUserById, rejectUserById,
+  renderProducts, openProductForm, saveProductForm,
+  openProductPicker, closeProductPicker,
   openModal, closeModal, showToast,
   renderDashboard,
   renderRequests, openNewRequestModal, approveRequest, promptReject, doReject,

@@ -64,6 +64,27 @@ export async function rejectRequest(id, rejectionReason)     { return _req('PATC
 export async function assignPricingRequest(id, products)     { return _req('PATCH', '/requests/' + id + '/assign-pricing', { products }); }
 export async function finalApproveRequest(id)                { return _req('PATCH', '/requests/' + id + '/final-approve'); }
 
+// ── Products ──
+async function _reqMP(method, path, formData) {
+  const headers = {};
+  const tok = getToken();
+  if (tok) headers['Authorization'] = 'Bearer ' + tok;
+  const res = await fetch(BASE + path, { method, headers, body: formData });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) { clearToken(); window.dispatchEvent(new Event('session-expired')); throw new Error(data.error || 'Session expired'); }
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+export async function getProducts(params) {
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return _req('GET', '/products' + qs);
+}
+export async function getProduct(id) { return _req('GET', '/products/' + id); }
+export async function saveProduct(formData, id) {
+  return id ? _reqMP('PUT', '/products/' + id, formData) : _reqMP('POST', '/products', formData);
+}
+export async function deleteProduct(id) { return _req('DELETE', '/products/' + id); }
+
 // ── Orders ──
 export async function getOrders() {
   const list = await _req('GET', '/orders');

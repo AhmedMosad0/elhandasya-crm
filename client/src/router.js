@@ -11,11 +11,12 @@ import { renderClientOrders } from './views/client-orders/client-orders.js';
 import { renderClientNewOrder } from './views/client-neworder/client-neworder.js';
 import { renderClientAccount } from './views/client-account/client-account.js';
 import { renderUsers } from './views/users/users.js';
+import { renderProducts } from './views/products/products.js';
 
 const TITLES = {
   dashboard:'Dashboard', requests:'Requests', orders:'Orders', clients:'Clients',
-  users:'Users', reports:'Reports', mywork:'My Work Queue', clientportal:'My Overview',
-  clientorders:'My Orders', clientneworder:'Place New Order', clientaccount:'My Account',
+  products:'Product Catalog', users:'Users', reports:'Reports', mywork:'My Work Queue',
+  clientportal:'My Overview', clientorders:'My Orders', clientneworder:'Place New Order', clientaccount:'My Account',
 };
 
 export async function navigate(sec, ...args) {
@@ -32,6 +33,7 @@ export async function navigate(sec, ...args) {
   else if (sec === 'requests')   await renderRequests(args[0] || 'all');
   else if (sec === 'orders')     await renderOrders(args[0] || 'all');
   else if (sec === 'clients')    await renderClients();
+  else if (sec === 'products')   await renderProducts();
   else if (sec === 'users')      await renderUsers();
   else if (sec === 'reports')    await renderReports();
   else if (sec === 'mywork')     await renderMyWork();
