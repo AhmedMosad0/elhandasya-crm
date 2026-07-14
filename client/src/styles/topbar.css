@@ -7,3 +7,5 @@
 .tb-notif{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative;transition:background .12s}
 .tb-notif:hover{background:var(--bg)}
 .notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--gold);border-radius:50%;border:2px solid white}
+[dir="rtl"] #mainContent{margin-left:0;margin-right:var(--sw)}
+[dir="rtl"] .notif-dot{right:auto;left:4px}

@@ -1,5 +1,6 @@
 import { App } from '../state/store.js';
 import * as api from '../api/index.js';
+import { t } from '../i18n/index.js';
 
 export let _portalMode = true; // client portal is the default
 let _signupRole = 'client';
@@ -18,28 +19,26 @@ export function defaultSection(role) {
 export function togglePortal() {
   _portalMode = !_portalMode;
   if (_portalMode) {
-    // Client portal (default)
-    document.getElementById('loginPanelTitle').textContent = 'Client Portal';
-    document.getElementById('loginPanelSub').textContent = 'Sign in to place and track your orders';
-    document.getElementById('loginBtn').textContent = 'Access My Portal →';
-    document.getElementById('loginBtn').className = 'lf-btn lf-btn-client';
+    document.getElementById('loginPanelTitle').textContent = t('auth.clientPortal');
+    document.getElementById('loginPanelSub').textContent   = t('auth.clientPortalSub');
+    document.getElementById('loginBtn').textContent = t('auth.accessPortal');
+    document.getElementById('loginBtn').className   = 'lf-btn lf-btn-client';
     document.getElementById('loginHints').innerHTML = `
-      <div class="login-hints-title">Client Accounts</div>
+      <div class="login-hints-title">${t('auth.clientAccounts')}</div>
       <div class="hint-row">👤 Hassan El-Sayed <span>hassan / client123</span></div>
       <div class="hint-row">👤 Layla Mostafa <span>layla / client123</span></div>
       <div class="hint-row">👤 Khaled Nour <span>khaled / client123</span></div>`;
-    document.getElementById('portalToggle').innerHTML = 'Staff? <a onclick="togglePortal()">Staff Login →</a>';
+    document.getElementById('portalToggle').innerHTML = `${t('auth.portalToggle')} <a onclick="togglePortal()">${t('auth.staffLink')}</a>`;
   } else {
-    // Staff login
-    document.getElementById('loginPanelTitle').textContent = 'Staff Login';
-    document.getElementById('loginPanelSub').textContent = 'Sign in to your workspace';
-    document.getElementById('loginBtn').textContent = 'Sign In →';
-    document.getElementById('loginBtn').className = 'lf-btn';
+    document.getElementById('loginPanelTitle').textContent = t('auth.staffLogin');
+    document.getElementById('loginPanelSub').textContent   = t('auth.staffLoginSub');
+    document.getElementById('loginBtn').textContent = t('auth.signIn');
+    document.getElementById('loginBtn').className   = 'lf-btn';
     document.getElementById('loginHints').innerHTML = `
-      <div class="login-hints-title">Staff Accounts</div>
+      <div class="login-hints-title">${t('auth.staffAccounts')}</div>
       <div class="hint-row">⬛ Admin <span>admin / admin123</span></div>
       <div class="hint-row">🟤 Sales <span>sales1 / sales123</span></div>`;
-    document.getElementById('portalToggle').innerHTML = '← <a onclick="togglePortal()">Back to Client Portal</a>';
+    document.getElementById('portalToggle').innerHTML = `← <a onclick="togglePortal()">${t('auth.backLink')}</a>`;
   }
 }
 
@@ -52,7 +51,7 @@ export async function doLogin() {
     App.user = { ...user, av: user.avatarInitials };
     window._showApp();
   } catch (err) {
-    document.getElementById('loginErr').textContent = '❌ ' + (err.message || 'Wrong username or password.');
+    document.getElementById('loginErr').textContent = '❌ ' + (err.message || t('auth.wrongCredentials'));
   }
 }
 
@@ -103,7 +102,7 @@ export async function doSignup() {
   successEl.classList.add('hidden');
 
   if (!name || !username || !password || !phone) {
-    errEl.textContent = '❌ Please fill in all required fields.';
+    errEl.textContent = '❌ ' + t('auth.fillRequired');
     return;
   }
 
@@ -126,7 +125,7 @@ export async function doSignup() {
       App.user = { ...result.user, av: result.user.avatarInitials };
       window._showApp();
     } else {
-      successEl.textContent = '✓ ' + (result.message || 'Account created. Waiting for admin approval.');
+      successEl.textContent = '✓ ' + (result.message || t('auth.pendingApproval'));
       successEl.classList.remove('hidden');
       ['signupName', 'signupUsername', 'signupPassword', 'signupPhone',
        'signupEmail', 'signupAddress', 'signupCompany', 'signupPhoneMatch']
@@ -149,8 +148,8 @@ export async function showApp() {
   document.getElementById('appContainer').classList.remove('hidden');
   const u = App.user;
   document.getElementById('sbAvatar').textContent = u.av;
-  document.getElementById('sbName').textContent = u.name;
-  document.getElementById('sbRole').textContent = roleLabel(u.role);
+  document.getElementById('sbName').textContent   = u.name;
+  document.getElementById('sbRole').textContent   = roleLabel(u.role);
   await window._renderNav();
   window._updateNotifDot();
   window.navigate(defaultSection(u.role));
@@ -176,6 +175,6 @@ window.addEventListener('session-expired', () => {
   const err   = document.getElementById('loginErr');
   if (app)   app.classList.add('hidden');
   if (login) login.classList.remove('hidden');
-  if (err)   err.textContent = '❌ Session expired — please sign in again.';
+  if (err)   err.textContent = '❌ ' + t('auth.sessionExpired');
   _resetToLogin();
 });

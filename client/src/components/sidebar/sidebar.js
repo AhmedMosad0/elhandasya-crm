@@ -1,12 +1,33 @@
 import { App } from '../../state/store.js';
 import * as api from '../../api/index.js';
+import { t } from '../../i18n/index.js';
 
 const NAV = {
-  admin:    [{ icon:'◈', label:'Dashboard', key:'dashboard' }, { icon:'◌', label:'Requests', key:'requests', badge:true }, { icon:'▣', label:'Orders', key:'orders' }, { icon:'◉', label:'Clients', key:'clients' }, { icon:'◫', label:'Products', key:'products' }, { icon:'◎', label:'Users', key:'users', usersBadge:true }, { icon:'▦', label:'Reports', key:'reports' }],
-  sales:    [{ icon:'◌', label:'My Requests',    key:'requests' }, { icon:'◉', label:'Clients', key:'clients' }],
+  admin:    [
+    { icon:'◈', key:'dashboard' },
+    { icon:'◌', key:'requests', badge:true },
+    { icon:'▣', key:'orders' },
+    { icon:'◉', key:'clients' },
+    { icon:'◫', key:'products' },
+    { icon:'◎', key:'users', usersBadge:true },
+    { icon:'▦', key:'reports' },
+  ],
+  sales:    [{ icon:'◌', key:'requests' }, { icon:'◉', key:'clients' }],
   mixer:    [],
   delivery: [],
-  client:   [{ icon:'◈', label:'My Overview',    key:'clientportal' }, { icon:'▣', label:'My Orders', key:'clientorders' }, { icon:'◌', label:'Place Order', key:'clientneworder' }, { icon:'◉', label:'My Account', key:'clientaccount' }],
+  client:   [
+    { icon:'◈', key:'clientportal' },
+    { icon:'▣', key:'clientorders' },
+    { icon:'◌', key:'clientneworder' },
+    { icon:'◉', key:'clientaccount' },
+  ],
+};
+
+const NAV_LABEL = {
+  dashboard: 'nav.dashboard', requests: 'nav.requests', orders: 'nav.orders',
+  clients: 'nav.clients', products: 'nav.products', users: 'nav.users',
+  reports: 'nav.reports', clientportal: 'nav.myOverview', clientorders: 'nav.myOrders',
+  clientneworder: 'nav.placeOrder', clientaccount: 'nav.myAccount',
 };
 
 export async function renderNav() {
@@ -24,10 +45,12 @@ export async function renderNav() {
     } catch { /* non-fatal */ }
   }
   document.getElementById('sbNav').innerHTML = items.map(n => {
+    const label      = t(NAV_LABEL[n.key] || 'nav.' + n.key);
     const badge      = n.badge      && pending      > 0 ? `<span class="nav-badge">${pending}</span>`      : '';
     const usersBadge = n.usersBadge && pendingUsers > 0 ? `<span class="nav-badge">${pendingUsers}</span>` : '';
-    return `<div class="nav-item" id="nav-${n.key}" onclick="navigate('${n.key}')"><span class="nav-icon">${n.icon}</span>${n.label}${badge}${usersBadge}</div>`;
+    return `<div class="nav-item" id="nav-${n.key}" onclick="navigate('${n.key}')"><span class="nav-icon">${n.icon}</span>${label}${badge}${usersBadge}</div>`;
   }).join('');
+  document.getElementById('sbLogout').textContent = t('nav.signOut');
   const current = document.getElementById('nav-' + App.section);
   if (current) current.classList.add('active');
   const dot = document.getElementById('notifDot');
@@ -35,6 +58,5 @@ export async function renderNav() {
 }
 
 export function updateNotifDot() {
-  // Dot is updated at the end of renderNav() which already holds the count.
-  // This stub is kept so existing callers (main.js, approveRequest, doReject) don't break.
+  // Stub — dot is updated inside renderNav()
 }

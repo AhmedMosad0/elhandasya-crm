@@ -3,9 +3,10 @@ import * as api from '../../api/index.js';
 import { fmtDate, fmtCur, cap, statusBadge, payBadge } from '../../utils/index.js';
 import { openModal, closeModal } from '../../components/modal/modal.js';
 import { showToast } from '../../components/toast/toast.js';
+import { t } from '../../i18n/index.js';
 
 export async function renderOrders(filter, q) {
-  document.getElementById('sectionOrders').innerHTML = '<div class="empty" style="padding:40px">Loading orders…</div>';
+  document.getElementById('sectionOrders').innerHTML = `<div class="empty" style="padding:40px">${t('orders.loading')}</div>`;
   try {
     const all = await api.getOrders();
     let ords = all;
@@ -15,17 +16,17 @@ export async function renderOrders(filter, q) {
     ords = [...ords].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
     const c = { all:all.length, pending:all.filter(o=>o.status==='pending').length, partial:all.filter(o=>o.status==='partial').length, delivered:all.filter(o=>o.status==='delivered').length, unpaid:all.filter(o=>o.paymentStatus==='unpaid').length };
     document.getElementById('sectionOrders').innerHTML = `
-    <div class="ph"><div class="ph-info"><h2>Orders</h2><p>Track delivery, payment and assignments</p></div></div>
+    <div class="ph"><div class="ph-info"><h2>${t('orders.title')}</h2><p>${t('orders.subtitle')}</p></div></div>
     <div class="fbar">
-      <button class="ftab ${!filter||filter==='all'?'active':''}" onclick="renderOrders('all')">All (${c.all})</button>
-      <button class="ftab ${filter==='pending'?'active':''}" onclick="renderOrders('pending')">Active (${c.pending})</button>
-      <button class="ftab ${filter==='partial'?'active':''}" onclick="renderOrders('partial')">Partial (${c.partial})</button>
-      <button class="ftab ${filter==='delivered'?'active':''}" onclick="renderOrders('delivered')">Delivered (${c.delivered})</button>
-      <button class="ftab ${filter==='unpaid'?'active':''}" onclick="renderOrders('unpaid')">Unpaid (${c.unpaid})</button>
+      <button class="ftab ${!filter||filter==='all'?'active':''}" onclick="renderOrders('all')">${t('orders.all')} (${c.all})</button>
+      <button class="ftab ${filter==='pending'?'active':''}" onclick="renderOrders('pending')">${t('orders.active')} (${c.pending})</button>
+      <button class="ftab ${filter==='partial'?'active':''}" onclick="renderOrders('partial')">${t('orders.partial')} (${c.partial})</button>
+      <button class="ftab ${filter==='delivered'?'active':''}" onclick="renderOrders('delivered')">${t('orders.delivered')} (${c.delivered})</button>
+      <button class="ftab ${filter==='unpaid'?'active':''}" onclick="renderOrders('unpaid')">${t('orders.unpaid')} (${c.unpaid})</button>
     </div>
-    <div class="cards-grid">${ords.length ? ords.map(o => _orderCard(o)).join('') : '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">▣</div><h4>No orders found</h4></div>'}</div>`;
+    <div class="cards-grid">${ords.length ? ords.map(o => _orderCard(o)).join('') : `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">▣</div><h4>${t('orders.noOrders')}</h4></div>`}</div>`;
   } catch (err) {
-    document.getElementById('sectionOrders').innerHTML = '<div class="empty" style="padding:40px">Failed to load orders</div>';
+    document.getElementById('sectionOrders').innerHTML = `<div class="empty" style="padding:40px">${t('orders.failed')}</div>`;
     showToast('Error: ' + err.message, 'toast-red');
   }
 }
@@ -34,14 +35,14 @@ function _orderCard(o) {
   const pct = o.totalAmount > 0 ? Math.round(o.paidAmount / o.totalAmount * 100) : 0;
   const bc = { pending:'oc-gold', mixing:'oc-blue', ready:'oc-slate', partial:'oc-amber', delivered:'oc-green' }[o.status] || 'oc-gold';
   const cwpBadge = o.claimWithoutPayment
-    ? `<div style="font-size:10px;color:#c2410c;font-weight:700;margin-top:3px">⚠ Claim w/o Payment</div>`
+    ? `<div style="font-size:10px;color:#c2410c;font-weight:700;margin-top:3px">${t('orders.cwpMini')}</div>`
     : '';
   return `<div class="ocard ${bc}" onclick="openOrderModal('${o.id}')">
-    <div class="ocard-head"><span class="recipe-tag">${o.recipeNum}</span>${o.source==='client'?`<span class="badge b-direct" style="font-size:10px">Client Portal</span>`:statusBadge(o.status)}</div>
+    <div class="ocard-head"><span class="recipe-tag">${o.recipeNum}</span>${o.source==='client'?`<span class="badge b-direct" style="font-size:10px">${t('orders.clientPortalSrc')}</span>`:statusBadge(o.status)}</div>
     <div class="ocard-client">${o.clientName}</div><div class="ocard-date">${fmtDate(o.createdAt)}</div>
     <div class="ocard-badges">${statusBadge(o.status)}${payBadge(o.paymentStatus)}</div>
     <div class="pay-bar-wrap"><div class="pay-bar-fill" style="width:${pct}%"></div></div>
-    <div class="pay-mini"><span>${fmtCur(o.paidAmount)} paid</span><span>${pct}%</span></div>
+    <div class="pay-mini"><span>${fmtCur(o.paidAmount)} ${t('orders.paidLabel2')}</span><span>${pct}%</span></div>
     ${cwpBadge}
   </div>`;
 }
@@ -66,25 +67,25 @@ export async function openOrderModal(oid) {
     }).join('');
     const pays = o.payments && o.payments.length
       ? o.payments.map(pay => `<div class="pay-entry"><div><strong>${fmtCur(pay.amount)}</strong><div class="pe-meta">${pay.note||'—'}</div></div><div style="text-align:right"><div class="pe-amount">${fmtCur(pay.amount)}</div><div class="pe-meta">${pay.date}</div></div></div>`).join('')
-      : `<div style="color:var(--mute);font-size:13px;padding:10px 0">No payments recorded yet</div>`;
+      : `<div style="color:var(--mute);font-size:13px;padding:10px 0">${t('orders.noPayments')}</div>`;
     const acts = (o.activity || []).slice().reverse().map(a => `<div class="act-item"><div class="act-dot"></div><div class="act-body">${a.text}<div class="act-time">${a.time} · ${a.user}</div></div></div>`).join('');
     const cwpBadge = o.claimWithoutPayment
-      ? `<div style="background:#fff7ed;border:1px solid #f97316;border-radius:6px;padding:7px 10px;font-size:12.5px;color:#c2410c;font-weight:600;margin-bottom:12px">⚠ Claim Without Payment Authorized</div>`
+      ? `<div style="background:#fff7ed;border:1px solid #f97316;border-radius:6px;padding:7px 10px;font-size:12.5px;color:#c2410c;font-weight:600;margin-bottom:12px">${t('orders.cwpBadge')}</div>`
       : '';
     const salesList = isAdmin ? users.filter(u => u.role === 'sales') : [];
     const assignSec = isAdmin ? `
-      <div class="fsec">Assignments</div>
-      ${salesList.length ? `<div class="fg" style="margin-bottom:12px"><label class="fl">Sales Rep</label>
+      <div class="fsec">${t('orders.assignments')}</div>
+      ${salesList.length ? `<div class="fg" style="margin-bottom:12px"><label class="fl">${t('orders.salesRep')}</label>
         <select class="fi" onchange="assignUser('${oid}','sales',this.value)">
-          <option value="">— Unassigned —</option>
+          <option value="">${t('orders.unassigned')}</option>
           ${salesList.map(s=>`<option value="${s.id}"${o.salesId===s.id?' selected':''}>${s.name}</option>`).join('')}
         </select></div>` : ''}
       <div class="fr2">
-        <div class="fg"><label class="fl">Order Status</label>
+        <div class="fg"><label class="fl">${t('orders.orderStatus')}</label>
           <select class="fi" onchange="updateOrderStatus('${oid}',this.value)">
             ${['pending','mixing','ready','partial','delivered'].map(s=>`<option value="${s}"${o.status===s?' selected':''}>${cap(s)}</option>`).join('')}
           </select></div>
-        <div class="fg"><label class="fl">Payment Status</label>
+        <div class="fg"><label class="fl">${t('orders.paymentStatus')}</label>
           <select class="fi" onchange="updatePayStatus('${oid}',this.value)">
             ${['unpaid','partial','paid'].map(s=>`<option value="${s}"${o.paymentStatus===s?' selected':''}>${cap(s)}</option>`).join('')}
           </select></div>
@@ -93,39 +94,39 @@ export async function openOrderModal(oid) {
     <div class="mc">
       <div class="two-col" style="margin-bottom:16px">
         <div class="info-block">
-          <div class="info-row"><span class="ir-label">Client</span><span class="ir-val">${o.clientName}</span></div>
-          <div class="info-row"><span class="ir-label">Phone</span><span class="ir-val">${o.clientPhone}</span></div>
-          <div class="info-row"><span class="ir-label">Address</span><span class="ir-val">${o.clientAddress}</span></div>
-          <div class="info-row"><span class="ir-label">Source</span><span class="ir-val">${o.source==='client'?'Client Portal':'Sales'}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.clientLabel')}</span><span class="ir-val">${o.clientName}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.phoneLabel')}</span><span class="ir-val">${o.clientPhone}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.addressLabel')}</span><span class="ir-val">${o.clientAddress}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.sourceLabel')}</span><span class="ir-val">${o.source==='client'?t('orders.clientPortalSrc'):t('orders.salesSrc')}</span></div>
         </div>
         <div class="info-block">
-          <div class="info-row"><span class="ir-label">Status</span><span class="ir-val">${statusBadge(o.status)}</span></div>
-          <div class="info-row"><span class="ir-label">Payment</span><span class="ir-val">${payBadge(o.paymentStatus)}</span></div>
-          <div class="info-row"><span class="ir-label">Total</span><span class="ir-val" style="color:var(--gold-d);font-weight:800">${fmtCur(o.totalAmount)}</span></div>
-          <div class="info-row"><span class="ir-label">Date</span><span class="ir-val">${fmtDate(o.createdAt)}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.statusLabel')}</span><span class="ir-val">${statusBadge(o.status)}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.paymentLabel')}</span><span class="ir-val">${payBadge(o.paymentStatus)}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.totalLabel')}</span><span class="ir-val" style="color:var(--gold-d);font-weight:800">${fmtCur(o.totalAmount)}</span></div>
+          <div class="info-row"><span class="ir-label">${t('orders.dateLabel')}</span><span class="ir-val">${fmtDate(o.createdAt)}</span></div>
         </div>
       </div>
       ${cwpBadge}
-      <div class="fsec">Delivery Tracking</div>
+      <div class="fsec">${t('orders.deliveryTracking')}</div>
       <div id="deliveryItems">${ditems}</div>
-      <div class="fsec">Payment</div>
+      <div class="fsec">${t('orders.paymentSection')}</div>
       <div class="pay-section">
         <div class="pay-nums">
-          <div class="pay-num pn-slate"><div class="pn-val">${fmtCur(o.totalAmount)}</div><div class="pn-lbl">Total</div></div>
-          <div class="pay-num pn-green"><div class="pn-val">${fmtCur(o.paidAmount)}</div><div class="pn-lbl">Paid</div></div>
-          <div class="pay-num pn-red"><div class="pn-val">${fmtCur(o.totalAmount-o.paidAmount)}</div><div class="pn-lbl">Remaining</div></div>
+          <div class="pay-num pn-slate"><div class="pn-val">${fmtCur(o.totalAmount)}</div><div class="pn-lbl">${t('orders.totalLabel')}</div></div>
+          <div class="pay-num pn-green"><div class="pn-val">${fmtCur(o.paidAmount)}</div><div class="pn-lbl">${t('orders.paidLabel')}</div></div>
+          <div class="pay-num pn-red"><div class="pn-val">${fmtCur(o.totalAmount-o.paidAmount)}</div><div class="pn-lbl">${t('orders.remainingLabel')}</div></div>
         </div>
         <div class="pay-bar-wrap" style="height:9px"><div class="pay-bar-fill" style="width:${pct}%"></div></div>
-        <div class="pay-mini"><span>${pct}% collected</span></div>
+        <div class="pay-mini"><span>${t('orders.collected', { n: pct })}</span></div>
         <div class="pay-list" style="margin-top:12px">${pays}</div>
-        ${(isAdmin||isSales)?`<button class="btn btn-green btn-sm" style="margin-top:8px" onclick="openAddPayment('${oid}')">＋ Add Payment</button>`:''}
+        ${(isAdmin||isSales)?`<button class="btn btn-green btn-sm" style="margin-top:8px" onclick="openAddPayment('${oid}')">${t('orders.addPayment')}</button>`:''}
       </div>
       ${assignSec}
-      <div class="fsec">Activity Log</div>
-      <div class="activity-log">${acts||'<div style="color:var(--mute);font-size:13px">No activity yet</div>'}</div>
+      <div class="fsec">${t('orders.activityLog')}</div>
+      <div class="activity-log">${acts||`<div style="color:var(--mute);font-size:13px">${t('orders.noActivity')}</div>`}</div>
     </div>
-    <div class="mf"><button class="btn btn-ghost" onclick="printReceipt('${oid}')">🖨 Print</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Close</button></div>`, 'modal-lg');
+    <div class="mf"><button class="btn btn-ghost" onclick="printReceipt('${oid}')">${t('orders.print')}</button>
+      <button class="btn btn-ghost" onclick="closeModal()">${t('orders.close')}</button></div>`, 'modal-lg');
   } catch (err) {
     showToast('Failed to load order: ' + err.message, 'toast-red');
   }
@@ -177,16 +178,16 @@ export async function updatePayStatus(oid, val) {
 }
 
 export function openAddPayment(oid) {
-  openModal(`<div class="mh"><div class="mh-left"><h3>Add Payment</h3></div><button class="mx" onclick="closeModal()">✕</button></div>
+  openModal(`<div class="mh"><div class="mh-left"><h3>${t('orders.addPaymentTitle')}</h3></div><button class="mx" onclick="closeModal()">✕</button></div>
   <div class="mc">
     <div class="fr2">
-      <div class="fg"><label class="fl req">Amount (EGP)</label><input class="fi" type="number" id="pay_amt" placeholder="0.00"></div>
-      <div class="fg"><label class="fl req">Date</label><input class="fi" type="date" id="pay_dt" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="fg"><label class="fl req">${t('orders.amountEgp')}</label><input class="fi" type="number" id="pay_amt" placeholder="0.00"></div>
+      <div class="fg"><label class="fl req">${t('orders.dateLabel2')}</label><input class="fi" type="date" id="pay_dt" value="${new Date().toISOString().split('T')[0]}"></div>
     </div>
-    <div class="fg"><label class="fl">Note</label><input class="fi" id="pay_nt" placeholder="e.g. Cash, partial…"></div>
+    <div class="fg"><label class="fl">${t('orders.noteLabel')}</label><input class="fi" id="pay_nt" placeholder="${t('orders.notePlaceholder')}"></div>
   </div>
-  <div class="mf"><button class="btn btn-ghost" onclick="openOrderModal('${oid}')">← Back</button>
-    <button class="btn btn-green" onclick="savePayment('${oid}')">Save Payment</button></div>`, 'modal-sm');
+  <div class="mf"><button class="btn btn-ghost" onclick="openOrderModal('${oid}')">${t('orders.back')}</button>
+    <button class="btn btn-green" onclick="savePayment('${oid}')">${t('orders.savePayment')}</button></div>`, 'modal-sm');
 }
 
 export async function savePayment(oid) {
@@ -203,7 +204,6 @@ export async function savePayment(oid) {
 }
 
 export async function printReceipt(oid) {
-  // Open the window synchronously (before any await) so popup blockers allow it
   const w = window.open('', '_blank');
   if (!w) { showToast('Popup blocked — allow popups for printing.', 'toast-red'); return; }
   w.document.write('<html><body style="font-family:Arial,sans-serif;padding:40px">Loading receipt…</body></html>');

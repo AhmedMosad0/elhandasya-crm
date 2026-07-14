@@ -6,14 +6,15 @@
 <title>El Handasya — CRM Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=Readex+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=Readex+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body>
 
 <!-- ═══════════════ LOGIN ═══════════════ -->
 <div id="loginScreen">
-  <div class="login-box">
+  <div class="login-box" style="position:relative">
+    <button class="lang-btn" onclick="switchLang()" style="position:absolute;top:14px;right:16px">عربي</button>
     <div class="login-brand">
       <div class="login-logo">
         <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
@@ -140,7 +141,7 @@
           <div class="sb-urole" id="sbRole"></div>
         </div>
       </div>
-      <button class="sb-logout" onclick="logout()">↩ Sign Out</button>
+      <button class="sb-logout" id="sbLogout" onclick="logout()">↩ Sign Out</button>
     </div>
   </aside>
 
@@ -151,6 +152,7 @@
         <span style="color:var(--mute);font-size:14px">🔍</span>
         <input placeholder="Search orders, clients…" id="searchInput" oninput="handleSearch()">
       </div>
+      <button class="lang-btn" onclick="switchLang()">عربي</button>
       <div class="tb-notif" onclick="navigate('requests')">
         🔔<div class="notif-dot" id="notifDot" style="display:none"></div>
       </div>

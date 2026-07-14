@@ -1,5 +1,6 @@
 import { App } from './state/store.js';
 import { cap } from './utils/index.js';
+import { t } from './i18n/index.js';
 import { renderDashboard } from './views/dashboard/dashboard.js';
 import { renderRequests } from './views/requests/requests.js';
 import { renderOrders } from './views/orders/orders.js';
@@ -13,10 +14,12 @@ import { renderClientAccount } from './views/client-account/client-account.js';
 import { renderUsers } from './views/users/users.js';
 import { renderProducts } from './views/products/products.js';
 
-const TITLES = {
-  dashboard:'Dashboard', requests:'Requests', orders:'Orders', clients:'Clients',
-  products:'Product Catalog', users:'Users', reports:'Reports', mywork:'My Work Queue',
-  clientportal:'My Overview', clientorders:'My Orders', clientneworder:'Place New Order', clientaccount:'My Account',
+const TITLE_KEYS = {
+  dashboard:'router.dashboard', requests:'router.requests', orders:'router.orders',
+  clients:'router.clients', products:'router.products', users:'router.users',
+  reports:'router.reports', mywork:'router.mywork',
+  clientportal:'router.clientportal', clientorders:'router.clientorders',
+  clientneworder:'router.clientneworder', clientaccount:'router.clientaccount',
 };
 
 export async function navigate(sec, ...args) {
@@ -27,7 +30,7 @@ export async function navigate(sec, ...args) {
   if (el) el.classList.add('active');
   const nv = document.getElementById('nav-' + sec);
   if (nv) nv.classList.add('active');
-  document.getElementById('tbTitle').textContent = TITLES[sec] || sec;
+  document.getElementById('tbTitle').textContent = TITLE_KEYS[sec] ? t(TITLE_KEYS[sec]) : sec;
 
   if (sec === 'dashboard')       await renderDashboard();
   else if (sec === 'requests')   await renderRequests(args[0] || 'all');

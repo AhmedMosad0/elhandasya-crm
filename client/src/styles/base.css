@@ -25,3 +25,47 @@ input,select,textarea,button{font-family:'DM Sans',inherit;font-size:13.5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--silver);border-radius:99px}
 @media print{#sidebar,.topbar,.mf,.rcard-actions,.ph-actions,.fbar,.btn{display:none!important}#mainContent{margin-left:0!important}}
+
+/* ── RTL OVERRIDES ── */
+[dir="rtl"] body{font-family:'Cairo','DM Sans',system-ui,sans-serif}
+[dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] h4{font-family:'Cairo','Plus Jakarta Sans',sans-serif}
+[dir="rtl"] input,[dir="rtl"] select,[dir="rtl"] textarea,[dir="rtl"] button{font-family:'Cairo','DM Sans',inherit}
+[dir="rtl"] #sidebar{left:auto;right:0}
+[dir="rtl"] #mainContent{margin-left:0;margin-right:var(--sw)}
+[dir="rtl"] .topbar{flex-direction:row-reverse}
+[dir="rtl"] .tb-title{text-align:right}
+[dir="rtl"] .sb-footer{direction:rtl}
+[dir="rtl"] .ph{flex-direction:row-reverse}
+[dir="rtl"] .ph-info{text-align:right}
+[dir="rtl"] .ph-actions{flex-direction:row-reverse}
+[dir="rtl"] .mh{flex-direction:row-reverse}
+[dir="rtl"] .mh-left{text-align:right}
+[dir="rtl"] .mf{flex-direction:row-reverse}
+[dir="rtl"] .fbar{flex-direction:row-reverse;flex-wrap:wrap}
+[dir="rtl"] .rcard-top{flex-direction:row-reverse}
+[dir="rtl"] .rcard-actions{flex-direction:row-reverse}
+[dir="rtl"] .info-row{flex-direction:row-reverse}
+[dir="rtl"] .ir-label{text-align:right}
+[dir="rtl"] .ir-val{text-align:left}
+[dir="rtl"] .lf-label{text-align:right}
+[dir="rtl"] .login-h,[dir="rtl"] .login-sub{text-align:right}
+[dir="rtl"] .login-portal-toggle,[dir="rtl"] .login-signup-links{text-align:right}
+[dir="rtl"] .login-hints-title{text-align:right}
+[dir="rtl"] .hint-row{flex-direction:row-reverse}
+[dir="rtl"] .nav-badge{margin-left:0;margin-right:auto}
+[dir="rtl"] .nav-item{flex-direction:row-reverse}
+[dir="rtl"] .nav-icon{text-align:center}
+[dir="rtl"] .sb-user{flex-direction:row-reverse}
+[dir="rtl"] .kpi{text-align:right}
+[dir="rtl"] .ccard-meta{flex-direction:row-reverse}
+[dir="rtl"] .toast{right:auto;left:24px}
+[dir="rtl"] .pay-mini{flex-direction:row-reverse}
+[dir="rtl"] .ocard-head{flex-direction:row-reverse}
+[dir="rtl"] .ocard-badges{flex-direction:row-reverse}
+[dir="rtl"] .ditem{flex-direction:row-reverse}
+[dir="rtl"] .pay-nums{flex-direction:row-reverse}
+[dir="rtl"] .fsec{text-align:right}
+[dir="rtl"] .fg label{text-align:right}
+[dir="rtl"] .fr2{direction:rtl}
+[dir="rtl"] .signup-role-toggle{flex-direction:row-reverse}
+@media print{[dir="rtl"] #mainContent{margin-right:0!important}}

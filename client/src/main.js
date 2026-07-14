@@ -1,3 +1,5 @@
+import { applyDocumentDir, setLang, getLang } from './i18n/index.js';
+import { App } from './state/store.js';
 import { doLogin, logout, togglePortal, showApp, checkSession, doSignup, showSignup, showLogin, selectSignupRole } from './auth/auth.js';
 import { navigate } from './router.js';
 import { openModal, closeModal } from './components/modal/modal.js';
@@ -32,6 +34,7 @@ import { openProductPicker, closeProductPicker } from './components/ProductPicke
 // Wire functions referenced from inline onclick/oninput attributes onto window.
 Object.assign(window, {
   doLogin, logout, togglePortal, navigate, handleSearch,
+  switchLang: () => setLang(getLang() === 'ar' ? 'en' : 'ar'),
   doSignup, showSignup, showLogin, selectSignupRole,
   renderUsers, approveUserById, rejectUserById,
   renderProducts, openProductForm, saveProductForm,
@@ -58,6 +61,9 @@ Object.assign(window, {
   _showApp: showApp,
 });
 
+window.__rerender = () => { if (window.navigate && App.section) window.navigate(App.section); };
+
 window.onload = () => {
+  applyDocumentDir();
   checkSession();
 };
