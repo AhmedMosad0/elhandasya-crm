@@ -21,6 +21,27 @@
 .sb-logout{width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:12px;transition:all .12s}
 .sb-logout:hover { background: rgba(201,178,152,.15); color: var(--gold); }
 
+/* Hidden on desktop — sign out is in the footer user section there */
+.mobile-signout { display: none; }
+
+@media (max-width: 768px) {
+  .mobile-signout {
+    display: flex;
+    margin-left: auto;
+    border-left: 1px solid rgba(255,255,255,.08);
+    color: #e57373 !important;
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+
+  [dir="rtl"] .mobile-signout {
+    margin-left: 0;
+    margin-right: auto;
+    border-left: none;
+    border-right: 1px solid rgba(255,255,255,.08);
+  }
+}
+
 @media (max-width: 768px) {
   #appContainer { flex-direction: column; }
 

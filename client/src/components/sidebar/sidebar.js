@@ -44,12 +44,13 @@ export async function renderNav() {
       pendingUsers = users.filter(u => u.status === 'pending').length;
     } catch { /* non-fatal */ }
   }
+  const signoutItem = `<div class="nav-item mobile-signout" onclick="window.doLogout()"><span class="nav-icon">⇠</span><span class="nav-label">${t('nav.signOut')}</span></div>`;
   document.getElementById('sbNav').innerHTML = items.map(n => {
     const label      = t(NAV_LABEL[n.key] || 'nav.' + n.key);
     const badge      = n.badge      && pending      > 0 ? `<span class="nav-badge">${pending}</span>`      : '';
     const usersBadge = n.usersBadge && pendingUsers > 0 ? `<span class="nav-badge">${pendingUsers}</span>` : '';
     return `<div class="nav-item" id="nav-${n.key}" onclick="navigate('${n.key}')"><span class="nav-icon">${n.icon}</span><span class="nav-label">${label}</span>${badge}${usersBadge}</div>`;
-  }).join('');
+  }).join('') + signoutItem;
   document.getElementById('sbLogout').textContent = t('nav.signOut');
   const current = document.getElementById('nav-' + App.section);
   if (current) current.classList.add('active');

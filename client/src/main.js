@@ -41,6 +41,7 @@ import {
 // Wire functions referenced from inline onclick/oninput attributes onto window.
 Object.assign(window, {
   doLogin, logout, togglePortal, navigate, handleSearch,
+  doLogout: () => logout(),
   switchLang: () => setLang(getLang() === 'ar' ? 'en' : 'ar'),
   doSignup, showSignup, showLogin, selectSignupRole,
   renderUsers, approveUserById, rejectUserById,
