@@ -51,7 +51,13 @@ export async function doLogin() {
     App.user = { ...user, av: user.avatarInitials };
     window._showApp();
   } catch (err) {
-    document.getElementById('loginErr').textContent = '❌ ' + (err.message || t('auth.wrongCredentials'));
+    let msg;
+    if (err.status === 403) {
+      msg = err.message?.includes('pending') ? t('auth.pendingApproval') : t('auth.rejected');
+    } else {
+      msg = t('auth.wrongCredentials');
+    }
+    document.getElementById('loginErr').textContent = '❌ ' + msg;
   }
 }
 
@@ -68,9 +74,58 @@ export function logout() {
 export function showSignup(role) {
   _signupRole = role || 'client';
   document.getElementById('loginForm').classList.add('hidden');
-  document.getElementById('signupForm').classList.remove('hidden');
-  document.getElementById('signupErr').textContent = '';
-  document.getElementById('signupSuccess').classList.add('hidden');
+  const sf = document.getElementById('signupForm');
+  sf.classList.remove('hidden');
+  sf.innerHTML = `
+    <div class="login-h">${t('signup.title')}</div>
+    <div class="lf-group">
+      <label class="lf-label">${t('signup.fullName')}</label>
+      <input class="lf-input" id="signupName" type="text" placeholder="${t('auth.namePlaceholder')}">
+    </div>
+    <div class="lf-group">
+      <label class="lf-label">${t('signup.username')}</label>
+      <input class="lf-input" id="signupUsername" type="text" placeholder="${t('auth.usernameSPlaceholder')}">
+    </div>
+    <div class="lf-group">
+      <label class="lf-label">${t('signup.password')}</label>
+      <input class="lf-input" id="signupPassword" type="password" placeholder="${t('auth.passwordPlaceholder')}">
+    </div>
+    <div class="lf-group">
+      <label class="lf-label">${t('signup.phone')}</label>
+      <input class="lf-input" id="signupPhone" type="text" placeholder="${t('auth.phonePlaceholder')}">
+    </div>
+    <div class="lf-group">
+      <label class="lf-label">${t('signup.role')}</label>
+      <div class="signup-role-toggle">
+        <button id="signupRoleBtn_client" class="role-btn" onclick="selectSignupRole('client')">${t('signup.roleClient')}</button>
+        <button id="signupRoleBtn_sales"  class="role-btn" onclick="selectSignupRole('sales')">${t('signup.roleSales')}</button>
+      </div>
+    </div>
+    <div id="signupClientFields" class="hidden">
+      <div class="lf-group">
+        <label class="lf-label">${t('signup.email')}</label>
+        <input class="lf-input" id="signupEmail" type="email" placeholder="${t('auth.emailPlaceholder')}">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">${t('signup.address')}</label>
+        <input class="lf-input" id="signupAddress" type="text" placeholder="${t('auth.addressPlaceholder')}">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">${t('signup.company')}</label>
+        <input class="lf-input" id="signupCompany" type="text" placeholder="${t('auth.companyPlaceholder')}">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">${t('signup.linkPhone')}</label>
+        <input class="lf-input" id="signupPhoneMatch" type="text" placeholder="${t('auth.phonePlaceholder')}">
+        <div class="lf-hint">${t('signup.linkPhoneHint')}</div>
+      </div>
+    </div>
+    <button class="lf-btn" onclick="doSignup()">${t('signup.submit')}</button>
+    <div class="lf-err" id="signupErr"></div>
+    <div class="lf-success hidden" id="signupSuccess"></div>
+    <div class="login-portal-toggle" style="margin-top:14px">
+      <a onclick="showLogin()" style="cursor:pointer">${t('signup.backToLogin')}</a>
+    </div>`;
   selectSignupRole(_signupRole);
 }
 
@@ -125,14 +180,18 @@ export async function doSignup() {
       App.user = { ...result.user, av: result.user.avatarInitials };
       window._showApp();
     } else {
-      successEl.textContent = '✓ ' + (result.message || t('auth.pendingApproval'));
+      successEl.textContent = '✓ ' + t('signup.pendingMessage');
       successEl.classList.remove('hidden');
       ['signupName', 'signupUsername', 'signupPassword', 'signupPhone',
        'signupEmail', 'signupAddress', 'signupCompany', 'signupPhoneMatch']
         .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     }
   } catch (err) {
-    errEl.textContent = '❌ ' + (err.message || 'Signup failed.');
+    let msg = err.message || t('common.failed');
+    if (msg?.includes('Username already taken') || msg?.includes('already taken')) {
+      msg = t('auth.usernameTaken');
+    }
+    errEl.textContent = '❌ ' + msg;
   }
 }
 
@@ -158,6 +217,18 @@ export async function showApp() {
 export function refreshLoginForm() {
   const ls = document.getElementById('loginScreen');
   if (!ls || ls.classList.contains('hidden')) return;
+
+  // If signup form is currently visible, re-render it (preserving input values)
+  const sf = document.getElementById('signupForm');
+  if (sf && !sf.classList.contains('hidden')) {
+    const saved = {};
+    ['signupName','signupUsername','signupPassword','signupPhone',
+     'signupEmail','signupAddress','signupCompany','signupPhoneMatch']
+      .forEach(id => { const el = document.getElementById(id); if (el) saved[id] = el.value; });
+    showSignup(_signupRole);
+    Object.entries(saved).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+    return;
+  }
 
   // Username / password labels + placeholders
   const ul = document.getElementById('loginUserLabel');

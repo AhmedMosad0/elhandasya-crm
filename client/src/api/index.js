@@ -26,7 +26,11 @@ async function _req(method, path, body) {
     window.dispatchEvent(new Event('session-expired'));
     throw new Error(data.error || 'Session expired');
   }
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  if (!res.ok) {
+    const err = new Error(data.error || `Request failed (${res.status})`);
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 
@@ -76,7 +80,11 @@ async function _reqMP(method, path, formData) {
   const res = await fetch(BASE + path, { method, headers, body: formData });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) { clearToken(); window.dispatchEvent(new Event('session-expired')); throw new Error(data.error || 'Session expired'); }
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  if (!res.ok) {
+    const err = new Error(data.error || `Request failed (${res.status})`);
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 export async function getProducts(params) {

@@ -58,59 +58,8 @@
       </div>
     </div>
 
-    <!-- ── SIGNUP FORM ── -->
-    <div id="signupForm" class="hidden">
-      <div class="login-h">Create Account</div>
-      <div class="login-sub">Join the El Handasya platform</div>
-      <div class="lf-group">
-        <label class="lf-label">Full Name</label>
-        <input class="lf-input" id="signupName" type="text" placeholder="e.g. Ahmed Mohamed">
-      </div>
-      <div class="lf-group">
-        <label class="lf-label">Username</label>
-        <input class="lf-input" id="signupUsername" type="text" placeholder="e.g. ahmed_m">
-      </div>
-      <div class="lf-group">
-        <label class="lf-label">Password</label>
-        <input class="lf-input" id="signupPassword" type="password" placeholder="••••••••">
-      </div>
-      <div class="lf-group">
-        <label class="lf-label">Phone</label>
-        <input class="lf-input" id="signupPhone" type="text" placeholder="e.g. 01012345678">
-      </div>
-      <div class="lf-group">
-        <label class="lf-label">I am a…</label>
-        <div class="signup-role-toggle">
-          <button id="signupRoleBtn_client" class="role-btn active" onclick="selectSignupRole('client')">Client</button>
-          <button id="signupRoleBtn_sales"  class="role-btn"        onclick="selectSignupRole('sales')">Sales</button>
-        </div>
-      </div>
-      <div id="signupClientFields">
-        <div class="lf-group">
-          <label class="lf-label">Email <span class="lf-opt">(optional)</span></label>
-          <input class="lf-input" id="signupEmail" type="email" placeholder="e.g. ahmed@gmail.com">
-        </div>
-        <div class="lf-group">
-          <label class="lf-label">Address <span class="lf-opt">(optional)</span></label>
-          <input class="lf-input" id="signupAddress" type="text" placeholder="e.g. Cairo, Maadi">
-        </div>
-        <div class="lf-group">
-          <label class="lf-label">Company <span class="lf-opt">(optional)</span></label>
-          <input class="lf-input" id="signupCompany" type="text" placeholder="e.g. Ahmed Construction">
-        </div>
-        <div class="lf-group">
-          <label class="lf-label">Link Existing Record <span class="lf-opt">(optional)</span></label>
-          <input class="lf-input" id="signupPhoneMatch" type="text" placeholder="Phone of your existing client record">
-          <div class="lf-hint">Enter your phone if you already have a client record with us</div>
-        </div>
-      </div>
-      <button class="lf-btn" onclick="doSignup()">Create Account →</button>
-      <div class="lf-err" id="signupErr"></div>
-      <div class="lf-success hidden" id="signupSuccess"></div>
-      <div class="login-portal-toggle" style="margin-top:14px">
-        Already have an account? <a onclick="showLogin()">Sign in →</a>
-      </div>
-    </div>
+    <!-- ── SIGNUP FORM (rendered dynamically by showSignup() in auth.js) ── -->
+    <div id="signupForm" class="hidden"></div>
 
   </div>
 </div>
