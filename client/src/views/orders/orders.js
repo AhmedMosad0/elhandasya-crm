@@ -107,6 +107,13 @@ export async function openOrderModal(oid) {
         </div>
       </div>
       ${cwpBadge}
+      ${(isAdmin || isSales) ? `
+      <div class="contact-actions">
+        <button onclick="callClientOrder('${oid}')" class="btn-call">📞 ${t('wa.call')}</button>
+        <button onclick="waOrderConfirmed('${oid}')" class="btn-wa">💬 ${t('wa.orderConfirmed')}</button>
+        <button onclick="waOrderReceipt('${oid}')" class="btn-wa">💬 ${t('wa.sendReceipt')}</button>
+        <button onclick="printOrder('${oid}')" class="btn-print">🖨️ ${t('wa.printReceipt')}</button>
+      </div>` : ''}
       <div class="fsec">${t('orders.deliveryTracking')}</div>
       <div id="deliveryItems">${ditems}</div>
       <div class="fsec">${t('orders.paymentSection')}</div>

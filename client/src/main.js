@@ -30,6 +30,13 @@ import { renderClientAccount } from './views/client-account/client-account.js';
 import { renderUsers, approveUserById, rejectUserById } from './views/users/users.js';
 import { renderProducts, openProductForm, saveProductForm } from './views/products/products.js';
 import { openProductPicker, closeProductPicker } from './components/ProductPicker/product-picker.js';
+import * as api from './api/index.js';
+import {
+  openPhoneCall, openWhatsApp,
+  buildWAInitialContact, buildWAPricingReady,
+  buildWAOrderConfirmed, buildWAReceipt,
+  printReceipt as printDoc,
+} from './utils/index.js';
 
 // Wire functions referenced from inline onclick/oninput attributes onto window.
 Object.assign(window, {
@@ -64,6 +71,44 @@ Object.assign(window, {
 });
 
 window._refreshLogin = refreshLoginForm;
+
+// ── WhatsApp / Call / Print handlers ──
+window.callClient = (phone) => openPhoneCall(phone);
+
+window.callClientOrder = async (orderId) => {
+  const o = await api.getOrder(orderId);
+  openPhoneCall(o.clientPhone);
+};
+
+window.waInitial = async (reqId) => {
+  const req = await api.getRequest(reqId);
+  openWhatsApp(req.phone, buildWAInitialContact(req.clientName, App.user.name));
+};
+
+window.waPricing = async (reqId) => {
+  const req = await api.getRequest(reqId);
+  openWhatsApp(req.phone, buildWAPricingReady(req.clientName, App.user.name, req.ref, req.totalAmount));
+};
+
+window.printRequestReceipt = async (reqId) => {
+  const req = await api.getRequest(reqId);
+  printDoc(req);
+};
+
+window.waOrderConfirmed = async (orderId) => {
+  const o = await api.getOrder(orderId);
+  openWhatsApp(o.clientPhone, buildWAOrderConfirmed(o.clientName, o.recipeNum, o.totalAmount, o.products));
+};
+
+window.waOrderReceipt = async (orderId) => {
+  const o = await api.getOrder(orderId);
+  openWhatsApp(o.clientPhone, buildWAReceipt(o.clientName, o.recipeNum, o.products, o.totalAmount, o.paidAmount, o.totalAmount - o.paidAmount));
+};
+
+window.printOrder = async (orderId) => {
+  const o = await api.getOrder(orderId);
+  printDoc(o);
+};
 
 // Full atomic re-render: lang buttons → login form → sidebar → topbar → current view
 window.__rerenderAll = () => {

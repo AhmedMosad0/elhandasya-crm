@@ -312,5 +312,13 @@ export default {
     placeNewOrder: '＋ طلب جديد', profileNotFound: 'الملف الشخصي غير موجود',
     loading: 'تحميل الحساب…', failed: 'فشل تحميل الحساب',
   },
+  wa: {
+    call: 'اتصال بالعميل',
+    initialContact: 'تواصل أولي',
+    sendPricing: 'إرسال الأسعار',
+    orderConfirmed: 'تأكيد الطلب',
+    sendReceipt: 'إرسال الإيصال',
+    printReceipt: 'طباعة الإيصال',
+  },
   lang: { toggle: '🌐 English' },
 };

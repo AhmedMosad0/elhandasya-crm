@@ -286,6 +286,10 @@ function _consultationCard(r) {
     ${summary ? `<div style="font-size:12.5px;color:var(--mute);margin-bottom:8px">${summary}</div>` : ''}
     ${r.consultNotes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.consultNotes}</div>` : ''}
     ${_adminNotesBlock(r, false)}
+    <div class="contact-actions">
+      <button onclick="callClient('${r.phone}')" class="btn-call">📞 ${t('wa.call')}</button>
+      <button onclick="waInitial('${r.id}')" class="btn-wa">💬 ${t('wa.initialContact')}</button>
+    </div>
     <div class="rcard-actions">
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="claimConsultation('${r.id}')">${t('requests.claimBtn')}</button>
       <button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px">${t('requests.contactBtn')}</button>
@@ -310,6 +314,12 @@ function _consultPricingCard(r) {
     ${summary ? `<div style="font-size:12.5px;color:var(--mute);margin-bottom:8px">${summary}</div>` : ''}
     ${r.consultNotes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.consultNotes}</div>` : ''}
     ${_adminNotesBlock(r, false)}
+    <div class="contact-actions">
+      <button onclick="callClient('${r.phone}')" class="btn-call">📞 ${t('wa.call')}</button>
+      <button onclick="waInitial('${r.id}')" class="btn-wa">💬 ${t('wa.initialContact')}</button>
+      <button onclick="waPricing('${r.id}')" class="btn-wa">💬 ${t('wa.sendPricing')}</button>
+      <button onclick="printRequestReceipt('${r.id}')" class="btn-print">🖨️ ${t('wa.printReceipt')}</button>
+    </div>
     <div class="rcard-actions">
       <button class="btn btn-gold btn-sm" style="flex:1" onclick="openConsultPricingModal('${r.id}')">${t('requests.setPriceBtn')}</button>
       <button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px">${t('requests.contactBtn')}</button>
@@ -364,6 +374,13 @@ function _salesReqCard(r, isOwn) {
     ${_adminNotesBlock(r, false)}
     ${_cwpBlock(r, false)}
     ${isOwn ? `<button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px;margin-top:4px">${t('requests.updateContact')}</button>` : ''}
+    <div class="contact-actions">
+      <button onclick="callClient('${r.phone}')" class="btn-call">📞 ${t('wa.call')}</button>
+      <button onclick="waInitial('${r.id}')" class="btn-wa">💬 ${t('wa.initialContact')}</button>
+      ${isOwn ? `
+      <button onclick="waPricing('${r.id}')" class="btn-wa">💬 ${t('wa.sendPricing')}</button>
+      <button onclick="printRequestReceipt('${r.id}')" class="btn-print">🖨️ ${t('wa.printReceipt')}</button>` : ''}
+    </div>
     ${extraAct}
   </div>`;
 }
@@ -381,6 +398,12 @@ function _pricingCard(r) {
     <div class="rcard-products">${rows}</div>
     ${r.notes ? `<div style="font-size:12px;color:var(--mute);margin-bottom:8px">📝 ${r.notes}</div>` : ''}
     ${_adminNotesBlock(r, false)}
+    <div class="contact-actions">
+      <button onclick="callClient('${r.phone}')" class="btn-call">📞 ${t('wa.call')}</button>
+      <button onclick="waInitial('${r.id}')" class="btn-wa">💬 ${t('wa.initialContact')}</button>
+      <button onclick="waPricing('${r.id}')" class="btn-wa">💬 ${t('wa.sendPricing')}</button>
+      <button onclick="printRequestReceipt('${r.id}')" class="btn-print">🖨️ ${t('wa.printReceipt')}</button>
+    </div>
     <div class="rcard-actions">
       <button class="btn btn-gold btn-sm" style="flex:1" onclick="openPricingModal('${r.id}')">${t('requests.addPricingBtn')}</button>
       <button class="btn btn-ghost btn-xs" onclick="openCallStatusModal('${r.id}')" style="font-size:11px">${t('requests.contactBtn')}</button>

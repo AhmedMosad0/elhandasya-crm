@@ -311,5 +311,13 @@ export default {
     placeNewOrder: '＋ Place New Order', profileNotFound: 'Profile not found',
     loading: 'Loading account…', failed: 'Failed to load account',
   },
+  wa: {
+    call: 'Call Client',
+    initialContact: 'Initial Contact',
+    sendPricing: 'Send Pricing',
+    orderConfirmed: 'Order Confirmed',
+    sendReceipt: 'Send Receipt',
+    printReceipt: 'Print Receipt',
+  },
   lang: { toggle: '🌐 عربي' },
 };
