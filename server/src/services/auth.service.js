@@ -33,7 +33,8 @@ export const authService = {
     return publicUser(user);
   },
 
-  async signup({ name, username, password, phone, role, email, address, company, phoneForMatch }) {
+  async signup({ name, username: rawUsername, password, phone, role, email, address, company, phoneForMatch }) {
+    const username = rawUsername.toLowerCase().trim();
     if (!name || !username || !password || !phone || !role) {
       throw Object.assign(new Error('name, username, password, phone, role are required'), { status: 400 });
     }
