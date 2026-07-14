@@ -244,7 +244,7 @@ window._openPickerForClient = _openPickerForClient;
 export async function submitClientOrder() {
   const addr  = (document.getElementById('co_addr')?.value  || '').trim();
   const phone = (document.getElementById('co_phone')?.value || '').trim();
-  if (!addr || !phone) { alert('Please enter delivery address and phone.'); return; }
+  if (!addr || !phone) { alert(t('clientNewOrder.needDeliveryInfo')); return; }
 
   const products = [];
   let hasIncomplete = false;
@@ -273,10 +273,10 @@ export async function submitClientOrder() {
   });
 
   if (hasIncomplete) {
-    showToast('Please complete all product details or remove incomplete rows', 'toast-red');
+    showToast(t('clientNewOrder.completeProducts'), 'toast-red');
     return;
   }
-  if (!products.length) { alert('Add at least one product with name and quantity.'); return; }
+  if (!products.length) { alert(t('clientNewOrder.addAtLeastOne')); return; }
 
   try {
     await api.createRequest({
@@ -288,9 +288,9 @@ export async function submitClientOrder() {
     const successEl = document.getElementById('cnOrderSuccess');
     if (formEl)    formEl.classList.add('hidden');
     if (successEl) { successEl.textContent = t('clientNewOrder.orderSuccess'); successEl.classList.remove('hidden'); }
-    showToast('Order request submitted!', 'toast-gold');
+    showToast(t('clientNewOrder.orderSubmitted'), 'toast-gold');
   } catch (err) {
-    showToast('Failed to submit: ' + err.message, 'toast-red');
+    showToast(t('clientNewOrder.failedSubmit') + ': ' + err.message, 'toast-red');
   }
 }
 
@@ -298,10 +298,10 @@ export async function submitClientOrder() {
 export async function submitConsultation() {
   const addr  = (document.getElementById('co_addr')?.value  || '').trim();
   const phone = (document.getElementById('co_phone')?.value || '').trim();
-  if (!addr || !phone) { alert('Please enter address and phone.'); return; }
-  if (!_surfaceType) { alert('Please select a surface type (Internal / External).'); return; }
-  if (!_texture)     { alert('Please select a surface texture.'); return; }
-  if (!_spaceType)   { alert('Please select a space type (Room / Apartment).'); return; }
+  if (!addr || !phone) { alert(t('clientNewOrder.needContactInfo')); return; }
+  if (!_surfaceType) { alert(t('clientNewOrder.selectSurface')); return; }
+  if (!_texture)     { alert(t('clientNewOrder.selectTexture')); return; }
+  if (!_spaceType)   { alert(t('clientNewOrder.selectSpace')); return; }
 
   const payload = {
     clientId: App.user.clientId, clientName: App.user.name,
@@ -315,11 +315,11 @@ export async function submitConsultation() {
     payload.roomLength = parseFloat(document.getElementById('co_rl')?.value) || null;
     payload.roomWidth  = parseFloat(document.getElementById('co_rw')?.value) || null;
     payload.roomHeight = parseFloat(document.getElementById('co_rh')?.value) || null;
-    if (!payload.roomLength || !payload.roomWidth) { alert('Please enter room length and width.'); return; }
+    if (!payload.roomLength || !payload.roomWidth) { alert(t('clientNewOrder.enterRoomDims')); return; }
   } else if (_spaceType === 'apartment') {
     payload.numRooms      = parseInt(document.getElementById('co_rooms')?.value)   || null;
     payload.apartmentArea = parseFloat(document.getElementById('co_aarea')?.value) || null;
-    if (!payload.numRooms || !payload.apartmentArea) { alert('Please enter number of rooms and total area.'); return; }
+    if (!payload.numRooms || !payload.apartmentArea) { alert(t('clientNewOrder.enterApartmentDims')); return; }
   }
 
   try {
@@ -328,8 +328,8 @@ export async function submitConsultation() {
     const successEl = document.getElementById('cnConsultSuccess');
     if (formEl)    formEl.classList.add('hidden');
     if (successEl) { successEl.textContent = t('clientNewOrder.consultSuccess'); successEl.classList.remove('hidden'); }
-    showToast('Consultation request submitted!', 'toast-gold');
+    showToast(t('clientNewOrder.consultSubmitted'), 'toast-gold');
   } catch (err) {
-    showToast('Failed to submit: ' + err.message, 'toast-red');
+    showToast(t('clientNewOrder.failedSubmit') + ': ' + err.message, 'toast-red');
   }
 }

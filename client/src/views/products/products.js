@@ -2,6 +2,7 @@ import * as api from '../../api/index.js';
 import { openModal, closeModal } from '../../components/modal/modal.js';
 import { showToast } from '../../components/toast/toast.js';
 import { t } from '../../i18n/index.js';
+import { CATEGORY_LABELS } from '../../components/ProductPicker/product-picker.js';
 
 const CATS = [
   'Interior Walls', 'Exterior Walls', 'Wood & Metal',
@@ -50,7 +51,7 @@ function _draw() {
     <button class="ftab${!_pCat ? ' active' : ''}" data-cat="" onclick="_prodCat(this.dataset.cat)">${t('products.all')} (${_products.length})</button>
     ${CATS.map(c => {
       const count = _products.filter(p => p.category === c).length;
-      return `<button class="ftab${_pCat === c ? ' active' : ''}" data-cat="${c}" onclick="_prodCat(this.dataset.cat)">${c.replace('&', '&amp;')} (${count})</button>`;
+      return `<button class="ftab${_pCat === c ? ' active' : ''}" data-cat="${c}" onclick="_prodCat(this.dataset.cat)">${CATEGORY_LABELS[c]?.() ?? c} (${count})</button>`;
     }).join('')}
   </div>
   <div class="cards-grid" style="margin-top:16px">
@@ -72,7 +73,7 @@ function _card(p) {
     <div style="font-size:13.5px;font-weight:700;margin-bottom:2px">${p.nameEn}</div>
     <div style="font-size:12px;color:var(--mute);margin-bottom:6px;direction:rtl;text-align:right">${p.nameAr || ''}</div>
     <div style="margin-bottom:8px">
-      <span style="font-size:11px;background:var(--gold-l);color:var(--gold-d);padding:1px 7px;border-radius:99px">${p.category || ''}</span>
+      <span style="font-size:11px;background:var(--gold-l);color:var(--gold-d);padding:1px 7px;border-radius:99px">${CATEGORY_LABELS[p.category]?.() ?? (p.category || '')}</span>
     </div>
     <div style="font-size:12px;margin-bottom:12px;line-height:1.8">${vs}</div>
     <div class="rcard-actions">
@@ -90,7 +91,7 @@ export function openProductForm(id) {
   const v3  = vs.find(v => v.size === '3L')?.price  ?? '';
   const v10 = vs.find(v => v.size === '10L')?.price ?? '';
 
-  const catOpts = CATS.map(c => `<option value="${c}"${p?.category === c ? ' selected' : ''}>${c.replace('&', '&amp;')}</option>`).join('');
+  const catOpts = CATS.map(c => `<option value="${c}"${p?.category === c ? ' selected' : ''}>${CATEGORY_LABELS[c]?.() ?? c}</option>`).join('');
   const imgBlock = p?.imageUrl
     ? `<img src="${p.imageUrl}" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-bottom:8px">`
     : `<div style="height:72px;background:var(--border-l);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:22px;color:var(--mute)">${t('products.noImage')}</div>`;

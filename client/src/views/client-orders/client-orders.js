@@ -74,7 +74,7 @@ export async function renderClientOrders(filter) {
     ${ords.length ? ords.map(o => `
     <div class="portal-order-card" onclick="openClientOrderDetail('${o.id}')">
       <div class="portal-order-head"><span class="portal-order-num">${o.recipeNum}</span><div style="display:flex;gap:7px">${statusBadge(o.status)}${payBadge(o.paymentStatus)}</div></div>
-      <div style="font-size:12.5px;color:var(--mute);margin:6px 0">${fmtDate(o.createdAt)} · ${o.products.length} ${o.products.length > 1 ? 'products' : 'product'}</div>
+      <div style="font-size:12.5px;color:var(--mute);margin:6px 0">${fmtDate(o.createdAt)} · ${o.products.length} ${o.products.length !== 1 ? t('common.products') : t('common.product')}</div>
       ${o.products.map(p => `<div style="font-size:13px;padding:3px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between"><span>${p.name}</span><span style="color:var(--mute)">${p.qty} L</span></div>`).join('')}
       <div style="display:flex;justify-content:space-between;margin-top:10px;align-items:center">
         <div class="pay-bar-wrap" style="flex:1;margin:0 12px 0 0"><div class="pay-bar-fill" style="width:${o.totalAmount>0?Math.round(o.paidAmount/o.totalAmount*100):0}%"></div></div>
@@ -119,6 +119,6 @@ export async function openClientOrderDetail(oid) {
     </div>
     <div class="mf"><button class="btn btn-ghost" onclick="closeModal()">${t('clientOrders.close')}</button></div>`, 'modal-md');
   } catch (err) {
-    window.showToast('Failed to load order: ' + err.message, 'toast-red');
+    window.showToast(t('clientOrders.failedLoad') + ': ' + err.message, 'toast-red');
   }
 }
