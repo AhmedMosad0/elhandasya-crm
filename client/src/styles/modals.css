@@ -8,4 +8,23 @@
 .mc{padding:22px}
 .mf{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;position:sticky;bottom:0;background:white;border-radius:0 0 18px 18px}
 .mx{width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;color:var(--mute);transition:all .12s}
-.mx:hover{background:#fdecea;color:var(--red)}
+.mx:hover { background: #fdecea; color: var(--red); }
+
+@media (max-width: 768px) {
+  #overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    width: 100%;
+  }
+
+  .modal-sm, .modal-md, .modal-lg { max-width: 100%; }
+
+  .mh { border-radius: 20px 20px 0 0; }
+  .mf { border-radius: 0; }
+  .mc { padding: 16px; }
+}

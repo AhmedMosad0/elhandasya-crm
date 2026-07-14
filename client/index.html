@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>El Handasya — CRM Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,13 +97,15 @@
   <div id="mainContent">
     <div class="topbar">
       <div class="tb-title" id="tbTitle">Dashboard</div>
-      <div class="tb-search">
-        <span style="color:var(--mute);font-size:14px">🔍</span>
-        <input placeholder="Search orders, clients…" id="searchInput" oninput="handleSearch()">
-      </div>
-      <button class="lang-btn" onclick="switchLang()">عربي</button>
-      <div class="tb-notif" onclick="navigate('requests')">
-        🔔<div class="notif-dot" id="notifDot" style="display:none"></div>
+      <div class="topbar-right">
+        <div class="tb-search">
+          <span style="color:var(--mute);font-size:14px">🔍</span>
+          <input placeholder="Search orders, clients…" id="searchInput" oninput="handleSearch()">
+        </div>
+        <button class="lang-btn" onclick="switchLang()">عربي</button>
+        <div class="tb-notif" onclick="navigate('requests')">
+          🔔<div class="notif-dot" id="notifDot" style="display:none"></div>
+        </div>
       </div>
     </div>
     <div class="content">

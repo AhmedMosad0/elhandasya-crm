@@ -30,4 +30,12 @@
 .toast.show{transform:translateY(0);opacity:1}
 .toast.toast-green{background:var(--green)}
 .toast.toast-gold{background:var(--gold-d);color:white}
-.toast.toast-red{background:var(--red)}
+.toast.toast-red { background: var(--red); }
+
+@media (max-width: 768px) {
+  .content { padding: 12px; padding-bottom: 76px; }
+  .ph { margin-bottom: 14px; }
+  .ph-info h2 { font-size: 17px; }
+  .toast { bottom: 70px; left: 12px; right: 12px; max-width: none; }
+  [dir="rtl"] .toast { left: 12px; right: 12px; }
+}

@@ -1,4 +1,4 @@
-#appContainer{display:flex;min-height:100vh}
+#appContainer { display: flex; min-height: 100vh; }
 #sidebar{width:var(--sw);background:var(--sidebar);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:200}
 .sb-head{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
 .sb-brand{display:flex;align-items:center;gap:11px}
@@ -19,4 +19,81 @@
 .sb-uname{color:white;font-size:12.5px;font-weight:600}
 .sb-urole{color:rgba(255,255,255,.4);font-size:11px}
 .sb-logout{width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:12px;transition:all .12s}
-.sb-logout:hover{background:rgba(201,178,152,.15);color:var(--gold)}
+.sb-logout:hover { background: rgba(201,178,152,.15); color: var(--gold); }
+
+@media (max-width: 768px) {
+  #appContainer { flex-direction: column; }
+
+  #sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100% !important;
+    height: 60px;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 1000;
+    border-top: 1px solid rgba(201,178,152,.2);
+    border-right: none;
+    padding: 0;
+  }
+
+  [dir="rtl"] #sidebar { left: 0; right: 0; border-left: none; }
+
+  /* Hide branding and user section — not enough space */
+  .sb-head, .sb-footer { display: none; }
+
+  .sb-nav {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .sb-nav::-webkit-scrollbar { display: none; }
+
+  .nav-section { display: none; }
+
+  .nav-item {
+    flex: 1;
+    flex-direction: column;
+    min-width: 56px;
+    padding: 6px 4px 4px;
+    gap: 2px;
+    text-align: center;
+    border-radius: 0;
+    margin-bottom: 0;
+    justify-content: center;
+    align-items: center;
+    border-left: none !important;
+    border-bottom: 3px solid transparent;
+    color: rgba(255,255,255,.5);
+  }
+
+  .nav-item.active {
+    background: rgba(201,178,152,.1);
+    border-bottom: 3px solid var(--gold);
+    border-left: none !important;
+    color: var(--gold);
+  }
+
+  .nav-icon { font-size: 17px; width: auto; }
+  .nav-label { font-size: 9px; line-height: 1.2; }
+
+  .nav-badge {
+    position: absolute;
+    top: 3px;
+    right: 6px;
+    margin: 0;
+    font-size: 8px;
+    padding: 1px 4px;
+    min-width: 14px;
+  }
+}

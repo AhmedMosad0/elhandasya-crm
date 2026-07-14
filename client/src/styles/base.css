@@ -31,9 +31,6 @@ input,select,textarea,button{font-family:'DM Sans',inherit;font-size:13.5px}
 [dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] h4{font-family:'Cairo','Plus Jakarta Sans',sans-serif}
 [dir="rtl"] input,[dir="rtl"] select,[dir="rtl"] textarea,[dir="rtl"] button{font-family:'Cairo','DM Sans',inherit}
 [dir="rtl"] #sidebar{left:auto;right:0}
-[dir="rtl"] #mainContent{margin-left:0;margin-right:var(--sw)}
-[dir="rtl"] .topbar{flex-direction:row-reverse}
-[dir="rtl"] .tb-title{text-align:right}
 [dir="rtl"] .sb-footer{direction:rtl}
 [dir="rtl"] .ph{flex-direction:row-reverse}
 [dir="rtl"] .ph-info{text-align:right}
@@ -69,3 +66,27 @@ input,select,textarea,button{font-family:'DM Sans',inherit;font-size:13.5px}
 [dir="rtl"] .fr2{direction:rtl}
 [dir="rtl"] .signup-role-toggle{flex-direction:row-reverse}
 @media print{[dir="rtl"] #mainContent{margin-right:0!important}}
+
+/* ── RTL nav overrides for column layout on mobile ── */
+@media (max-width: 768px) {
+  [dir="rtl"] .nav-item { flex-direction: column !important; }
+  [dir="rtl"] .sb-footer { direction: ltr; }
+
+  /* Touch targets */
+  .btn, input, select { min-height: 44px; }
+  .btn-sm { min-height: 36px; }
+  .btn-xs { min-height: 30px; }
+  .btn-call, .btn-wa, .btn-print { min-height: 40px; }
+
+  /* KPI grid 2 columns on mobile */
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Two-col stacks on mobile */
+  .two-col, .three-col { grid-template-columns: 1fr !important; }
+
+  /* Tables scroll horizontally */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Hide less important info on mobile */
+  .hide-mobile { display: none !important; }
+}

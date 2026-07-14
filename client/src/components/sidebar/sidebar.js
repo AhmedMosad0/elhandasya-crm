@@ -48,7 +48,7 @@ export async function renderNav() {
     const label      = t(NAV_LABEL[n.key] || 'nav.' + n.key);
     const badge      = n.badge      && pending      > 0 ? `<span class="nav-badge">${pending}</span>`      : '';
     const usersBadge = n.usersBadge && pendingUsers > 0 ? `<span class="nav-badge">${pendingUsers}</span>` : '';
-    return `<div class="nav-item" id="nav-${n.key}" onclick="navigate('${n.key}')"><span class="nav-icon">${n.icon}</span>${label}${badge}${usersBadge}</div>`;
+    return `<div class="nav-item" id="nav-${n.key}" onclick="navigate('${n.key}')"><span class="nav-icon">${n.icon}</span><span class="nav-label">${label}</span>${badge}${usersBadge}</div>`;
   }).join('');
   document.getElementById('sbLogout').textContent = t('nav.signOut');
   const current = document.getElementById('nav-' + App.section);

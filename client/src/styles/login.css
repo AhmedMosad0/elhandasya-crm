@@ -51,4 +51,34 @@
 [dir="rtl"] .login-name{text-align:center}
 [dir="rtl"] .login-portal-toggle{text-align:center}
 [dir="rtl"] .login-signup-links{text-align:center}
-[dir="rtl"] .hint-row{flex-direction:row-reverse}
+[dir="rtl"] .hint-row { flex-direction: row-reverse; }
+
+@media (max-width: 768px) {
+  #loginScreen {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 48px;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 100%;
+    padding: 28px 20px;
+    border-radius: 16px;
+    box-shadow: var(--sh2);
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .login-lang-btn {
+    top: 12px;
+    right: 12px;
+  }
+
+  [dir="rtl"] .login-lang-btn {
+    right: auto;
+    left: 12px;
+  }
+
+  .lf-input, .lf-btn { min-height: 48px; }
+}
