@@ -4,8 +4,8 @@ import { doLogin, logout, togglePortal, showApp, checkSession, doSignup, showSig
 import { navigate } from './router.js';
 import { openModal, closeModal } from './components/modal/modal.js';
 import { showToast } from './components/toast/toast.js';
-import { renderNav, updateNotifDot } from './components/sidebar/sidebar.js';
-import { handleSearch } from './components/topbar/topbar.js';
+import { renderNav, renderSidebar, updateNotifDot } from './components/sidebar/sidebar.js';
+import { handleSearch, updateTopbar } from './components/topbar/topbar.js';
 
 import { renderDashboard } from './views/dashboard/dashboard.js';
 import {
@@ -57,15 +57,23 @@ Object.assign(window, {
   renderClientNewOrder, addCPline, rmCPline, calcCT, submitClientOrder, submitConsultation,
   renderClientAccount,
   _renderNav: renderNav,
+  _renderSidebar: renderSidebar,
+  _updateTopbar: updateTopbar,
   _updateNotifDot: updateNotifDot,
   _showApp: showApp,
 });
 
 window._refreshLogin = refreshLoginForm;
 
-window.__rerender = () => {
-  if (window._renderNav && App.user) window._renderNav();
-  if (window.navigate && App.section) window.navigate(App.section);
+// Full atomic re-render: lang buttons → login form → sidebar → topbar → current view
+window.__rerenderAll = () => {
+  updateLangBtns();                                    // all .lang-btn labels everywhere
+  if (window._refreshLogin) window._refreshLogin();   // login screen labels (if visible)
+  if (App.user) {
+    renderNav();                                       // sidebar nav labels + logout btn
+    updateTopbar();                                    // search input placeholder
+    if (App.section) navigate(App.section);            // current view + tbTitle
+  }
 };
 
 window.onload = () => {

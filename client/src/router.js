@@ -15,11 +15,18 @@ import { renderUsers } from './views/users/users.js';
 import { renderProducts } from './views/products/products.js';
 
 const TITLE_KEYS = {
-  dashboard:'router.dashboard', requests:'router.requests', orders:'router.orders',
-  clients:'router.clients', products:'router.products', users:'router.users',
-  reports:'router.reports', mywork:'router.mywork',
-  clientportal:'router.clientportal', clientorders:'router.clientorders',
-  clientneworder:'router.clientneworder', clientaccount:'router.clientaccount',
+  dashboard:      () => t('router.dashboard'),
+  requests:       () => t('router.requests'),
+  orders:         () => t('router.orders'),
+  clients:        () => t('router.clients'),
+  products:       () => t('router.products'),
+  users:          () => t('router.users'),
+  reports:        () => t('router.reports'),
+  mywork:         () => t('router.mywork'),
+  clientportal:   () => t('router.clientportal'),
+  clientorders:   () => t('router.clientorders'),
+  clientneworder: () => t('router.clientneworder'),
+  clientaccount:  () => t('router.clientaccount'),
 };
 
 export async function navigate(sec, ...args) {
@@ -30,7 +37,7 @@ export async function navigate(sec, ...args) {
   if (el) el.classList.add('active');
   const nv = document.getElementById('nav-' + sec);
   if (nv) nv.classList.add('active');
-  document.getElementById('tbTitle').textContent = TITLE_KEYS[sec] ? t(TITLE_KEYS[sec]) : sec;
+  document.getElementById('tbTitle').textContent = TITLE_KEYS[sec]?.() ?? sec;
 
   if (sec === 'dashboard')       await renderDashboard();
   else if (sec === 'requests')   await renderRequests(args[0] || 'all');

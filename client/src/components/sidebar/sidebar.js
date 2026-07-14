@@ -60,3 +60,5 @@ export async function renderNav() {
 export function updateNotifDot() {
   // Stub — dot is updated inside renderNav()
 }
+
+export const renderSidebar = renderNav;

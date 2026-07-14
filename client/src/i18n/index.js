@@ -11,9 +11,13 @@ export function setLang(lang) {
   _lang = lang;
   localStorage.setItem('eh_lang', lang);
   applyDocumentDir();
-  _updateLangBtns();
-  if (window._refreshLogin) window._refreshLogin();
-  if (window.__rerender) window.__rerender();
+  if (window.__rerenderAll) {
+    window.__rerenderAll();
+  } else {
+    // Fallback before main.js has fully loaded
+    _updateLangBtns();
+    if (window._refreshLogin) window._refreshLogin();
+  }
 }
 
 export function applyDocumentDir() {
