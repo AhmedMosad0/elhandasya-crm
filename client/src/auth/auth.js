@@ -155,6 +155,46 @@ export async function showApp() {
   window.navigate(defaultSection(u.role));
 }
 
+export function refreshLoginForm() {
+  const ls = document.getElementById('loginScreen');
+  if (!ls || ls.classList.contains('hidden')) return;
+
+  // Username / password labels + placeholders
+  const ul = document.getElementById('loginUserLabel');
+  const pl = document.getElementById('loginPassLabel');
+  const ui = document.getElementById('loginUser');
+  const pi = document.getElementById('loginPass');
+  if (ul) ul.textContent = t('auth.username');
+  if (pl) pl.textContent = t('auth.password');
+  if (ui) ui.placeholder = t('auth.usernamePlaceholder');
+  if (pi) pi.placeholder = t('auth.passwordPlaceholder');
+
+  // Portal mode titles / button / toggle link
+  const panelTitle = document.getElementById('loginPanelTitle');
+  const panelSub   = document.getElementById('loginPanelSub');
+  const loginBtn   = document.getElementById('loginBtn');
+  const portalTog  = document.getElementById('portalToggle');
+  if (_portalMode) {
+    if (panelTitle) panelTitle.textContent = t('auth.clientPortal');
+    if (panelSub)   panelSub.textContent   = t('auth.clientPortalSub');
+    if (loginBtn)   loginBtn.textContent   = t('auth.accessPortal');
+    if (portalTog)  portalTog.innerHTML    = `${t('auth.portalToggle')} <a onclick="togglePortal()">${t('auth.staffLink')}</a>`;
+  } else {
+    if (panelTitle) panelTitle.textContent = t('auth.staffLogin');
+    if (panelSub)   panelSub.textContent   = t('auth.staffLoginSub');
+    if (loginBtn)   loginBtn.textContent   = t('auth.signIn');
+    if (portalTog)  portalTog.innerHTML    = `← <a onclick="togglePortal()">${t('auth.backLink')}</a>`;
+  }
+
+  // Signup links
+  const signupLinks = document.querySelector('.login-signup-links');
+  if (signupLinks) {
+    signupLinks.innerHTML = `
+      <div>${t('auth.newClient')} <a onclick="showSignup('client')">${t('auth.createAccountLink')}</a></div>
+      <div>${t('auth.staffMember')} <a onclick="showSignup('sales')">${t('auth.requestAccessLink')}</a></div>`;
+  }
+}
+
 export async function checkSession() {
   const tok = api.getToken();
   if (!tok) return;

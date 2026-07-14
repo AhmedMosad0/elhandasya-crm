@@ -12,6 +12,7 @@ export function setLang(lang) {
   localStorage.setItem('eh_lang', lang);
   applyDocumentDir();
   _updateLangBtns();
+  if (window._refreshLogin) window._refreshLogin();
   if (window.__rerender) window.__rerender();
 }
 
@@ -38,3 +39,5 @@ function _updateLangBtns() {
   const label = t('lang.toggle');
   document.querySelectorAll('.lang-btn').forEach(btn => { btn.textContent = label; });
 }
+
+export function updateLangBtns() { _updateLangBtns(); }

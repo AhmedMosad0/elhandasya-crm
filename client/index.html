@@ -14,7 +14,7 @@
 <!-- ═══════════════ LOGIN ═══════════════ -->
 <div id="loginScreen">
   <div class="login-box" style="position:relative">
-    <button class="lang-btn" onclick="switchLang()" style="position:absolute;top:14px;right:16px">عربي</button>
+    <button class="lang-btn login-lang-btn" onclick="switchLang()">🌐 عربي</button>
     <div class="login-brand">
       <div class="login-logo">
         <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
@@ -34,11 +34,11 @@
       <div class="login-h" id="loginPanelTitle">Client Portal</div>
       <div class="login-sub" id="loginPanelSub">Sign in to place and track your orders</div>
       <div class="lf-group">
-        <label class="lf-label">Username</label>
+        <label class="lf-label" id="loginUserLabel">Username</label>
         <input class="lf-input" id="loginUser" type="text" placeholder="e.g. hassan" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <div class="lf-group">
-        <label class="lf-label">Password</label>
+        <label class="lf-label" id="loginPassLabel">Password</label>
         <input class="lf-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <button class="lf-btn lf-btn-client" id="loginBtn" onclick="doLogin()">Access My Portal →</button>

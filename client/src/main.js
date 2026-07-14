@@ -1,6 +1,6 @@
-import { applyDocumentDir, setLang, getLang } from './i18n/index.js';
+import { applyDocumentDir, setLang, getLang, updateLangBtns } from './i18n/index.js';
 import { App } from './state/store.js';
-import { doLogin, logout, togglePortal, showApp, checkSession, doSignup, showSignup, showLogin, selectSignupRole } from './auth/auth.js';
+import { doLogin, logout, togglePortal, showApp, checkSession, doSignup, showSignup, showLogin, selectSignupRole, refreshLoginForm } from './auth/auth.js';
 import { navigate } from './router.js';
 import { openModal, closeModal } from './components/modal/modal.js';
 import { showToast } from './components/toast/toast.js';
@@ -61,9 +61,16 @@ Object.assign(window, {
   _showApp: showApp,
 });
 
-window.__rerender = () => { if (window.navigate && App.section) window.navigate(App.section); };
+window._refreshLogin = refreshLoginForm;
+
+window.__rerender = () => {
+  if (window._renderNav && App.user) window._renderNav();
+  if (window.navigate && App.section) window.navigate(App.section);
+};
 
 window.onload = () => {
   applyDocumentDir();
+  updateLangBtns();
+  refreshLoginForm();
   checkSession();
 };

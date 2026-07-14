@@ -40,4 +40,15 @@
 .login-box{max-height:95vh;overflow-y:auto}
 .lang-btn{padding:5px 12px;border:1.5px solid var(--border);border-radius:var(--r8);background:var(--bg);color:var(--ink-2);font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;font-family:'DM Sans',inherit}
 .lang-btn:hover{border-color:var(--gold);color:var(--gold-d)}
-[dir="rtl"] .login-box .lang-btn{right:auto;left:16px}
+.login-lang-btn{position:absolute;top:16px;right:16px;background:transparent;border:1px solid #C9A84C;color:#C9A84C;border-radius:20px;padding:4px 14px;font-size:13px;font-weight:600;cursor:pointer;z-index:10;transition:opacity .15s}
+.login-lang-btn:hover{opacity:.8}
+[dir="rtl"] .login-lang-btn{right:auto;left:16px}
+[dir="rtl"] .login-box{direction:rtl;text-align:right}
+[dir="rtl"] .login-box input{text-align:right;direction:rtl}
+[dir="rtl"] .login-box label{display:block;text-align:right}
+[dir="rtl"] .login-box .lf-btn{font-family:'Cairo',sans-serif}
+[dir="rtl"] .login-brand{text-align:center}
+[dir="rtl"] .login-name{text-align:center}
+[dir="rtl"] .login-portal-toggle{text-align:center}
+[dir="rtl"] .login-signup-links{text-align:center}
+[dir="rtl"] .hint-row{flex-direction:row-reverse}
